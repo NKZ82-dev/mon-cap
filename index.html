@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon Cap</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0D1130">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Cap">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6FF;--ink:#15193D;--soft:#4F5582;--card:#FFFFFF;--hl:#FFD43B;--onhl:#15193D;
+  --ok:#1F8A3B;--warn:#B45F00;--n4:#2B8A3E;--n3:#1971C2;--n2:#D9480F;--n1:#C92A2A;--grid:rgba(40,70,190,.07);--line:#15193D;--shc:#15193D;--focus:#1971C2;--dash:rgba(79,85,130,.3);
+  color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0D1130;--ink:#EEF0FF;--soft:#A7AEDD;--card:#181D4B;--grid:rgba(140,160,255,.06);
+  --line:#8F98E8;--shc:#05071A;--focus:#74C0FC;--ok:#51CF66;--warn:#FFB84D;--dash:rgba(167,174,221,.3);--n4:#51CF66;--n3:#74C0FC;--n2:#FFA94D;--n1:#FF6B6B;color-scheme:dark;}}
+:root[data-theme="dark"]{--n4:#51CF66;--n3:#74C0FC;--n2:#FFA94D;--n1:#FF6B6B;
+  --paper:#0D1130;--ink:#EEF0FF;--soft:#A7AEDD;--card:#181D4B;--grid:rgba(140,160,255,.06);
+  --line:#8F98E8;--shc:#05071A;--focus:#74C0FC;--ok:#51CF66;--warn:#FFB84D;--dash:rgba(167,174,221,.3);color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
+body{margin:0;background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;color:var(--ink);font-family:'Lexend',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;line-height:1.5}
+h1,h2,h3{font-family:'Bricolage Grotesque','Lexend',system-ui,sans-serif;font-weight:800;line-height:1.1;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+#app{max-width:600px;margin:0 auto;padding:18px 16px 170px}
+.muted{color:var(--soft)}
+.top:empty{display:none}
+body.lock{position:fixed;left:0;right:0;overflow:hidden}
+.scrim,.sheet{overscroll-behavior:contain}
+.dayhead{margin:-4px 0 18px}
+.dayhead.r{text-align:right}
+.dayhead h1{font-size:1.6rem}
+.dayhead p{margin:2px 0 0;color:var(--soft);font-size:.95rem}
+.top{margin-bottom:16px}
+.top h1{font-size:1.7rem}
+.top p{margin:2px 0 0;color:var(--soft);font-size:.95rem}
+
+.seg{display:flex;gap:8px;margin-bottom:18px}
+.seg button{flex:1;border:3px solid var(--line);background:var(--card);border-radius:14px;padding:10px 6px;font-weight:600;cursor:pointer;min-height:50px}
+.seg button[aria-pressed="true"]{background:var(--hl);color:var(--onhl)}
+
+.hero{background:var(--hl);color:var(--onhl);border:3px solid var(--line);border-radius:22px;box-shadow:4px 4px 0 var(--shc);padding:16px 18px;margin-bottom:22px;cursor:pointer;text-align:left;width:100%;display:block}
+.hero small{display:block;font-weight:600;font-size:.85rem;opacity:.8}
+.hero b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.45rem;line-height:1.15;margin:4px 0 8px}
+.hero .chip{background:#fff;color:#15193D;border-color:#15193D}
+.hero .chip.co{background:var(--c);color:var(--fg)}
+
+.sec{margin:0 0 26px}
+.sec>h2{font-size:1.3rem;margin:0 0 10px}
+.empty{border:3px dashed var(--line);border-radius:14px;padding:14px;text-align:center;color:var(--soft)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:500;padding:1px 9px;border-radius:99px;border:2px solid var(--line);background:var(--card);white-space:nowrap}
+.chip.co{background:var(--c);color:var(--fg);border-color:var(--c)}
+.chip.star{background:var(--hl);color:var(--onhl);border-color:var(--line)}
+.chip.help{border-style:dashed}
+.chip.rc{cursor:pointer;font-size:.9rem;padding:5px 12px;min-height:38px;font-family:'Lexend',sans-serif;color:var(--ink)}
+.chip.rc:active{background:rgba(127,127,160,.15)}
+.src{font-size:.85rem;color:var(--soft)}
+
+/* Horaire */
+.slot{display:grid;grid-template-columns:50px 1fr;gap:10px;margin-bottom:8px}
+.slot time{font-weight:600;padding-top:12px;font-size:.9rem}
+.blk{border:3px solid var(--line);border-left:12px solid var(--c);border-radius:12px;background:var(--card);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.blk b{font-size:1.05rem}
+.slot.now .blk{background:var(--hl);color:var(--onhl)}
+.slot.past{opacity:.45}
+.slot.lunch .blk{border-style:dashed;border-left-width:3px;background:transparent;padding:6px 12px}
+.slot.lunch time{padding-top:8px}
+
+/* Tuiles */
+.tile{display:flex;align-items:stretch;background:var(--card);border:3px solid var(--line);border-radius:14px;margin:0 0 10px;overflow:hidden}
+.tile .band{width:10px;background:var(--c);flex:none}
+.tile .chk,.tile .emo{flex:none;width:56px;display:grid;place-items:center;border:0;border-right:2px dashed var(--dash);background:transparent}
+.tile .chk{cursor:pointer}
+.tile .emo{font-size:1.35rem}
+.box{width:30px;height:30px;border:3px solid var(--line);border-radius:9px;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--card)}
+.tile.done .box{background:var(--ok)}
+.tile .body{flex:1;min-width:0;text-align:left;background:transparent;border:0;padding:10px 12px;cursor:pointer;min-height:58px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.tile .title{font-weight:600;line-height:1.3}
+.tile.done .title{text-decoration:line-through;opacity:.55}
+.tile.done .chips{opacity:.6}
+.tile .body{position:relative;padding-right:36px}
+.hero,.proj{position:relative;padding-right:42px}
+.tile .body::after,.proj::after,.hero::after{content:'›';position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:2rem;line-height:1;color:var(--soft);font-weight:600}
+.hero::after{color:#15193D}
+.hero.hero-s{padding:10px 42px 12px 14px;margin-bottom:14px;border-radius:16px;box-shadow:3px 3px 0 var(--shc)}
+.hero.hero-s small{font-size:.75rem}
+.hero.hero-s b{font-size:1.1rem;margin:2px 0 6px}
+button.proj{display:grid;grid-template-columns:58px minmax(0,1fr) 22px;gap:12px;align-items:center;padding:12px 8px 12px 12px}
+button.proj::after{content:none}
+.proj .cd{display:grid;justify-items:center;align-content:center;gap:2px;border:3px solid var(--line);border-radius:12px;min-height:60px;background:var(--paper)}
+.proj .cd b{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.5rem;line-height:1}
+.proj .cd small{font-size:.72rem;color:var(--soft)}
+.proj .cd.soon{background:var(--hl);color:var(--onhl)}
+.proj .cd.soon small{color:var(--onhl)}
+.proj .pc{display:block;min-width:0}
+.proj .arr{font-size:2rem;line-height:1;color:var(--soft);font-weight:600;text-align:center}
+.proj.done{opacity:.55}
+h3.wk{font-size:1.15rem;margin:22px 0 10px}
+.ng{margin:16px 0}
+.ngh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ngr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:2px dashed var(--dash)}
+.ngr:last-child{border-bottom:0}
+.chip.old{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+h3.wk span{font-family:'Lexend',sans-serif;font-weight:400;font-size:.85rem}
+.ruler{position:relative;height:96px;margin:4px 14px 8px}
+.ruler .line{position:absolute;left:0;right:0;bottom:30px;height:4px;background:var(--line);border-radius:2px}
+.ruler i{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--c);border:2px solid var(--line);transform:translateX(-50%)}
+.ruler .tk{position:absolute;bottom:24px;width:2px;height:16px;background:var(--line);transform:translateX(-50%)}
+.ruler .tl{position:absolute;bottom:0;font-size:.72rem;color:var(--soft);transform:translateX(-50%);white-space:nowrap}
+.ruler .now{position:absolute;bottom:22px;left:0;width:4px;height:20px;background:var(--hl);border:2px solid var(--line);transform:translateX(-50%)}
+.ruler .fin{position:absolute;top:0;right:0;font-size:.78rem;font-weight:600;transform:translateX(30%)}
+.tile .body:active,.proj:active{background:rgba(127,127,160,.15)}
+.hero:active{filter:brightness(.95)}
+
+.bring{background:var(--card);border:3px solid var(--line);border-radius:14px;padding:4px 14px}
+.bring p{margin:0;padding:10px 0;border-bottom:2px dashed var(--dash)}
+.bring p:last-child{border-bottom:0}
+.bl{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:2px dashed var(--dash);cursor:pointer}
+.bl:last-child{border-bottom:0}
+.bl.sub{padding-left:28px}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.add{flex:none;border:2px dashed var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:4px 14px;font-family:'Lexend',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;min-height:38px}
+.add:active{background:rgba(127,127,160,.15)}
+.form{display:grid;gap:12px;margin-top:8px}
+.form label{display:grid;gap:4px;font-weight:500;font-size:.9rem}
+.form input,.form select,.form textarea{font:inherit;color:var(--ink);background:var(--card);border:3px solid var(--line);border-radius:12px;padding:10px 12px;min-height:48px;width:100%}
+.form textarea{min-height:76px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2 .btn{margin-top:10px}
+button.lien{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;font:inherit;cursor:pointer}
+.btn.danger{background:var(--card);color:var(--warn);border-color:var(--warn)}
+.manual{font-size:.88rem;color:var(--soft);margin:0}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;width:60px;height:60px;border-radius:50%;border:3px solid var(--line);background:var(--hl);color:var(--onhl);font-size:2.1rem;line-height:1;font-weight:600;cursor:pointer;box-shadow:3px 3px 0 var(--shc)}
+.fab:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shc)}
+.toast{position:fixed;left:50%;bottom:calc(160px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 16px;font-weight:600;max-width:88vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.on{opacity:1}
+.blr{display:flex;align-items:center;border-bottom:2px dashed var(--dash)}
+.blr:last-child{border-bottom:0}
+.blr .bl{flex:1;border-bottom:0}
+.ed{flex:none;width:44px;height:44px;border:0;background:transparent;font-size:1.9rem;line-height:1;color:var(--soft);cursor:pointer}
+.bl input{width:26px;height:26px;flex:none;accent-color:var(--ok);margin:0;cursor:pointer}
+.bl .t{display:block;font-weight:500;line-height:1.3}
+.bl small{display:block;color:var(--soft);font-size:.85rem;margin-top:2px}
+.bl.on .t{text-decoration:line-through;opacity:.55}
+.sec>.hint{margin:-6px 0 10px;color:var(--soft);font-size:.9rem}
+
+/* Semaine */
+details.day{background:var(--card);border:3px solid var(--line);border-radius:16px;margin-bottom:12px}
+details.day.today{outline:4px solid var(--hl)}
+details.day.past{opacity:.5}
+details.day>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:58px}
+details.day>summary::-webkit-details-marker{display:none}
+.dn b{font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem}
+.dn span{margin-left:6px;font-size:.85rem}
+.cnt{display:flex;gap:10px;font-weight:600;font-size:.95rem;align-items:center}
+.chev{display:inline-block;transition:transform .2s}
+details[open]>summary .chev{transform:rotate(180deg)}
+details.day>div{border-top:2px dashed var(--dash);padding:12px 14px 4px}
+.mini{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.mini span{font-size:.78rem;border-radius:8px;padding:2px 7px;background:var(--c);color:var(--fg)}
+
+/* Gros projets */
+.horizon{display:flex;align-items:center;gap:14px;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:14px;margin-bottom:22px}
+.horizon .big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:2.4rem;line-height:1}
+.proj{background:var(--card);border:3px solid var(--line);border-left:14px solid var(--c);border-radius:16px;padding:14px;margin-bottom:14px;cursor:pointer;text-align:left;width:100%;display:block}
+.proj h3{font-size:1.25rem;margin:8px 0 4px}
+.proj .chip.when{background:var(--hl);color:var(--onhl)}
+.bar{height:12px;border:3px solid var(--line);border-radius:99px;overflow:hidden;background:var(--card);margin:10px 0 0}
+.bar i{display:block;height:100%;background:var(--ok)}
+
+/* Notes */
+.grade{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:3px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.grade .big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.6rem;text-align:right}
+.grade svg{height:30px}.grade .spk{height:30px}
+.grade svg{width:100%;height:36px}
+.trend{font-size:.85rem;font-weight:600;text-align:right}
+.trend.up{color:var(--ok)}.trend.down{color:var(--warn)}
+.card{background:var(--card);border:3px solid var(--line);border-radius:14px;padding:14px}
+details.fold{border:3px solid var(--line);border-radius:14px;background:var(--card);padding:0 14px;margin:10px 0}
+details.fold>summary{cursor:pointer;padding:12px 0;font-weight:600;min-height:48px;list-style:none}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:'▾';float:right;transition:transform .2s}
+details.fold[open]>summary::after{transform:rotate(180deg)}
+details.fold>div{padding-bottom:12px}
+
+/* Navigation et fiche */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:3px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabs div{max-width:600px;margin:0 auto;display:flex;gap:6px}
+.tabs button{flex:1;display:grid;justify-items:center;border:3px solid var(--line);background:var(--card);border-radius:14px;padding:4px 2px;font-weight:600;font-size:.78rem;line-height:1.2;cursor:pointer;min-height:56px}
+.tabs button span{font-size:1.3rem;line-height:1.25}
+.tabs button[aria-current="page"]{background:var(--hl);color:var(--onhl)}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(10,12,40,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--paper);width:100%;max-width:600px;max-height:88vh;overflow-y:auto;border:3px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:18px 18px calc(26px + env(safe-area-inset-bottom,0px));animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}
+.sheet h2{font-size:1.5rem;margin:10px 0}
+.sheet .x{float:right;width:44px;height:44px;border-radius:50%;border:3px solid var(--line);background:var(--card);font-size:1.1rem;cursor:pointer}
+.sheet p{margin:8px 0}
+.sheet h3{font-size:1.05rem;margin:16px 0 4px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:2px dashed var(--dash);cursor:pointer}
+.step:last-child{border-bottom:0}
+.step input{flex:none;width:26px;height:26px;accent-color:var(--ok);margin:0;cursor:pointer}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;border:3px solid var(--line);background:var(--hl);color:var(--onhl);border-radius:14px;padding:12px;font-weight:600;cursor:pointer;min-height:52px;margin-top:16px}
+.btn.plain{background:var(--card);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* ===== Allègement visuel ===== */
+:root{--sel-bg:#15193D;--sel-fg:#FFFFFF}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sel-bg:#EEF0FF;--sel-fg:#0D1130}}
+:root[data-theme="dark"]{--sel-bg:#EEF0FF;--sel-fg:#0D1130}
+/* 1. Contours seulement sur ce qui se touche */
+.blk{border:0;border-left:8px solid var(--c);padding:8px 12px}
+.bring,.card,.horizon{border:0}
+.grade{border:2px solid var(--line)}
+.empty{border:0;background:var(--card);border-radius:14px}
+.tile,.proj,details.day,.seg button,.hero{border-width:2px}
+.proj{border-left-width:12px}
+details.day.today{outline:3px solid var(--hl)}
+/* 2. Jaune réservé à « maintenant » et aux évaluations */
+.seg button[aria-pressed="true"]{background:var(--sel-bg);color:var(--sel-fg)}
+/* 4. Horaire compact */
+.slot{margin-bottom:6px}
+.slot time{padding-top:8px}
+.blk b{font-size:1rem}
+.slot.now .blk{box-shadow:none}
+.slot.lunch .blk{border:0;background:transparent;padding:2px 12px;color:var(--soft)}
+.slot.lunch time{padding-top:4px;color:var(--soft)}
+/* 5. Barre du bas plus basse, + au centre */
+.tabs{border-top-width:2px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabs div{gap:4px;align-items:center}
+.tabs button{border:0;background:transparent;min-height:52px;font-size:.72rem;padding:4px 2px}
+.tabs button span{font-size:1.2rem}
+.tabs button[aria-current="page"]{background:var(--sel-bg);color:var(--sel-fg)}
+.tabs button.plus{flex:0 0 54px;width:54px;height:54px;min-height:54px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:2rem;line-height:1;display:grid;place-items:center;padding:0}
+#app{padding-bottom:110px}
+.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Barre du bas : espacement régulier, + centré */
+.tabs{padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabs div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) 64px repeat(2,minmax(0,1fr));gap:6px;align-items:center}
+.tabs button{width:100%;white-space:nowrap;font-size:clamp(.62rem,2.8vw,.76rem)}
+.tabs button.plus{justify-self:center;width:54px;height:54px;flex:none}
+.tabs button.plus svg{display:block}
+/* Formulaire d’ajout en plein écran */
+.scrim.full{background:var(--paper);align-items:stretch}
+.sheet.full{max-width:600px;height:100%;max-height:none;border:0;border-radius:0;padding:calc(16px + env(safe-area-inset-top,0px)) 18px calc(28px + env(safe-area-inset-bottom,0px));animation:none}
+.sheet.full h2{margin-top:6px}
+/* ===== Finitions : alignements et contrôles ===== */
+.bl input,.step input{appearance:none;-webkit-appearance:none;width:26px;height:26px;flex:none;margin:0;border:2px solid var(--line);border-radius:8px;background:var(--card) center/16px no-repeat;cursor:pointer}
+.bl input:checked,.step input:checked{background-color:var(--ok);border-color:var(--ok);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3L13 4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.step{align-items:center}
+.tile .box{width:28px;height:28px;border-width:2px;border-radius:8px;font-size:1rem}
+.tile.done .box{border-color:var(--ok)}
+.btn{background:var(--sel-bg);color:var(--sel-fg);border:2px solid var(--sel-bg)}
+.btn.plain{background:var(--card);color:var(--ink);border-color:var(--line)}
+.form input,.form select,.form textarea{border-width:2px}
+.form label>span{display:block}
+.fhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.fhead h2{margin:0}
+.fhead .x{float:none;flex:none}
+details.fold>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0;min-height:52px}
+details.fold>summary::after{float:none;flex:none}
+.ruler .fin{transform:none}
+.wnav{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:8px;margin-bottom:16px}
+.wbtn{width:48px;height:48px;padding:0;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.wbtn:disabled{opacity:.3;cursor:default}
+.wt{text-align:center;line-height:1.25}
+.wt b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem}
+.wt span{color:var(--soft);font-size:.88rem}
+.bring+.src{text-align:right}
+details.day>summary{padding:8px 14px;min-height:54px}
+details.day{margin-bottom:10px}
+/* ===== Micro-animations ===== */
+/* séparateur court centré */
+.sep{width:64px;height:3px;background:var(--line);border:0;border-radius:2px;margin:24px auto 18px;opacity:.7}
+/* métriques de la semaine */
+.wstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:-4px 0 16px}
+.wstat div{background:var(--card);border-radius:14px;padding:10px 8px;text-align:center}
+.wstat b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.5rem;line-height:1.1}
+.wstat span{font-size:.8rem;color:var(--soft)}
+/* titre de semaine cliquable (sélecteur) */
+button.wt{background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:4px 8px;border-radius:12px}
+button.wt b::after{content:' ▾';font-size:.8em;opacity:.7}
+.wlist button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);color:var(--ink);border:3px solid transparent;border-radius:14px;padding:12px 14px;margin:0 0 8px;font:inherit;cursor:pointer;min-height:56px}
+.wlist button[aria-current]{border-color:var(--hl)}
+.wlist small{display:block;color:var(--soft)}
+.wlist .wc{white-space:nowrap;font-weight:600}
+/* règle des évaluations : collante, points cliquables, semaine en cours mise en avant */
+.rwrap{position:sticky;top:0;z-index:6;background:var(--paper);padding:calc(6px + env(safe-area-inset-top,0px)) 0 2px;margin:0 -2px}
+.ruler .dot{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--c);border:2px solid var(--line);transform:translateX(-50%);padding:0;cursor:pointer;}
+.ruler .dot::after{content:'';position:absolute;inset:-12px}
+.ruler.go .dot{animation:dotK .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(.45s + var(--k) * 70ms)}
+.proj.flash{outline:4px solid var(--hl);outline-offset:2px;transition:outline-color .6s}
+/* courbe de notes : le point final n'est plus déformé */
+.spk{position:relative;height:36px}
+/* carte de matière compacte : nom + dernière note, courbe, smiley */
+.grade{padding:9px 12px}
+.grade .nm{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.grade .ln2{font-size:.8rem;color:var(--soft);white-space:nowrap}
+.grade .ln2 b{color:var(--ink);font-weight:600}
+.grade .ln2 .up{color:var(--ok)}.grade .ln2 .down{color:var(--warn)}
+.grade .smi{font-size:1.9rem;line-height:1}
+.go .grade .smi{animation:popk .35s ease-out 1s both}
+.gl b{color:var(--x,inherit)}
+.spk svg{width:100%;height:100%;display:block}
+.spk .pt{position:absolute;width:11px;height:11px;border-radius:50%;translate:-50% -50%}
+.go .spk .pt{animation:popk .35s ease-out 1s both}
+/* résumé du suivi cliquable */
+.srow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;color:var(--ink);font:inherit;text-align:left;padding:10px 0;cursor:pointer;min-height:48px}
+.srow+.srow{border-top:2px dashed var(--line)}
+.srow b{font-size:1.05rem}
+.sent{padding:10px 0;border-bottom:2px dashed var(--line)}
+.sent:last-child{border-bottom:0}
+.sent .m{font-size:.85rem;color:var(--soft)}
+.gl{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:2px dashed var(--line)}
+.gl:last-child{border-bottom:0}
+.gl b{white-space:nowrap}
+@keyframes popk{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes fadek{from{opacity:1}}
+@keyframes inK{from{opacity:0}}
+@keyframes outK{to{opacity:0}}
+@keyframes downK{to{transform:translateY(40px);opacity:0}}
+@keyframes revealK{from{opacity:0;transform:translateY(-6px)}}
+.pop .box,.pop input{animation:popk .3s ease-out}
+.pop .title,.pop .t{animation:fadek .3s ease-out}
+.tile,.proj,.hero,.tabs button,.seg button,.btn,.wbtn,.chip.rc,details.day>summary{transition:transform .12s ease}
+.tile:active,.proj:active,.hero:active,details.day>summary:active{transform:scale(.985)}
+.tabs button:active,.seg button:active,.btn:active,.wbtn:active,.chip.rc:active{transform:scale(.95)}
+.scrim{animation:inK .2s ease-out}
+.scrim.closing{animation:outK .18s ease-in forwards;pointer-events:none}
+.scrim.closing .sheet{animation:downK .18s ease-in forwards}
+.scrim.full.closing .sheet{animation:none}
+details.anim[open]>div{animation:revealK .22s ease-out}
+.toast{transform:translate(-50%,8px);transition:opacity .2s,transform .2s}
+.toast.on{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* Animations de la règle et des notes */
+@keyframes lineK{from{transform:scaleX(0)}}
+@keyframes dotK{0%{transform:translate(-50%,var(--dy)) scale(0);opacity:0}60%{opacity:1}100%{transform:translate(-50%,0) scale(1);opacity:1}}
+@keyframes drawK{to{stroke-dashoffset:0}}
+@keyframes growK{from{transform:scaleX(0)}}
+.ruler.go .line{transform-origin:left center;animation:lineK .5s ease-out both}
+.ruler.go .now{animation:popk .3s ease-out both}
+.ruler.go .tk,.ruler.go .tl,.ruler.go .fin{animation:inK .3s ease-out .35s both}
+.ruler.go i{animation:dotK .5s cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(.45s + var(--k) * 70ms)}
+@keyframes wipeK{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.go .grade svg{animation:wipeK .9s ease-out .15s both}
+.go .pt{transform-box:fill-box;transform-origin:center;animation:popk .35s ease-out 1s both}
+.go .trend{animation:inK .3s ease-out 1s both}
+.go .stk i{transform-origin:left center;animation:growK .7s ease-out .2s both}
+.go .stk i+i{animation-delay:.6s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* Fiche matière et cours touchables */
+button.cbtn{position:relative;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;padding-right:36px}
+button.cbtn::after{content:'›';position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1.7rem;line-height:1;color:var(--soft);font-weight:600}
+.slot.now button.cbtn::after{color:var(--onhl)}
+button.grade.cbtn{padding-right:36px}
+.prow2{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;min-height:52px}
+.prow2 .pn{font-weight:500}
+.cs p{margin:12px 0;line-height:1.45}
+.cs .tile{margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top" id="top"></header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" aria-label="Navigation principale"><div id="tabs"></div></nav>
+<div id="sheet-root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+function $(s){return document.querySelector(s);}
+
+/* ===== Données : uniquement Pednet et Classroom (relevées le 14 oct. 2026) ===== */
+/* ===== Données : rien n'est écrit dans ce fichier. Tout est chargé depuis le téléphone. ===== */
+/* Mon Cap — convertit une collecte brute de l'extension vers les données de l'app.
+   Utilisable dans le navigateur (app) et dans l'extension. Aucune donnée personnelle ici :
+   le lien prof → matière vient du profil. */
+/* Emoji d'une activité d'après son nom (et le texte qui l'annonce). L'ordre compte :
+   « tennis de table » avant « tennis », « football américain » avant « football ». 🏅 par défaut. */
+const EMOJIS_ACTIVITE=[
+  [/basket/,'🏀'],[/football am[ée]ricain|flag.?football/,'🏈'],[/soccer|football|futsal/,'⚽'],[/hockey/,'🏒'],
+  [/volley/,'🏐'],[/badminton/,'🏸'],[/tennis de table|ping.?pong/,'🏓'],[/tennis/,'🎾'],[/natation|nage|piscine|aquati/,'🏊'],
+  [/athl[ée]tisme|cross|course [aà] pied|\bcourse\b|marathon|\brun/,'🏃'],[/planche [aà] neige|snowboard/,'🏂'],[/\bski\b|ski alpin|ski de fond/,'⛷️'],
+  [/patin/,'⛸️'],[/gymnasti|trampoline/,'🤸'],[/escalade|grimpe/,'🧗'],[/judo|karat[ée]|taekwondo|arts? martia|jiu/,'🥋'],[/boxe/,'🥊'],
+  [/v[ée]lo|cyclisme|vtt/,'🚴'],[/baseball|softball/,'⚾'],[/rugby/,'🏉'],[/golf/,'⛳'],[/ultimate|frisbee/,'🥏'],[/cheer/,'📣'],
+  [/danse/,'💃'],[/chorale|\bchant\b|vocal/,'🎤'],[/musique|harmonie|orchestre|band|guitare|piano|violon/,'🎵'],
+  [/th[ée][aâ]tre|impro/,'🎭'],[/[ée]checs/,'♟️'],[/robot/,'🤖'],[/science|g[ée]nie/,'🔬'],[/arts? plastique|dessin|peinture|\bart\b/,'🎨'],
+  [/d[ée]bat|[ée]loquence/,'🗣️'],[/jeux? vid[ée]o|e.?sport/,'🎮'],[/plein air|camping/,'🏕️'],[/lecture|livre|biblioth/,'📚']];
+function emojiActivite(...textes){
+  const t=textes.join(' ').toLowerCase().normalize('NFC');
+  for(const [re,e] of EMOJIS_ACTIVITE) if(re.test(t)) return e;
+  return '🏅';
+}
+
+/* Profil construit à partir de la collecte : profs et locaux (Horaire), récups (consignes Classroom),
+   activités hebdomadaires (CapNet). Aucune saisie à la main. */
+function construireProfil(col){
+  const coba=col.coba||{}, cr=col.classroom||{}, hor=coba.horaire||{}, P={type:'mon-cap-profil',version:2,profs:{},activites:[],cycle:null};
+  const C3=c=>(c||'').slice(0,3).toUpperCase();
+  // noms complets connus par le Suivi : « Tremblay Roy, Marie »
+  const complets=[...new Set(((coba.suivi||{}).entrees||[]).map(e=>e.enseignant).filter(Boolean))];
+  const nomComplet=abr=>{
+    const [nom,ini]=abr.split(',').map(x=>(x||'').trim());
+    const racine=(nom||'').split(/[-\s]/)[0].toLowerCase();
+    const t=complets.find(c=>c.split(',')[0].toLowerCase().startsWith(racine)&&(!ini||(c.split(',')[1]||'').trim().toLowerCase().startsWith(ini.replace(/\./g,'').slice(0,1).toLowerCase())));
+    if(t){const [n,p]=t.split(',').map(x=>x.trim());return p?p+' '+n:n;}
+    return ini?ini+' '+nom:nom;   // forme abrégée de l'Horaire, telle quelle
+  };
+  const parCours={};
+  for(const k of hor.cases||[]){const c=C3(k.cours);(parCours[c]=parCours[c]||{profs:{},locaux:{}});
+    parCours[c].profs[k.prof]=(parCours[c].profs[k.prof]||0)+1; parCours[c].locaux[k.local]=(parCours[c].locaux[k.local]||0)+1;}
+  const parFreq=o=>Object.keys(o).sort((a,b)=>o[b]-o[a]);
+  for(const [c,v] of Object.entries(parCours)) P.profs[c]={p:nomComplet(parFreq(v.profs)[0]),loc:parFreq(v.locaux).join(' ou ')};
+  // récups annoncées dans une consigne Classroom : on garde la phrase exacte du prof
+  const CRC=nom=>{const n=(nom||'').toLowerCase();if(/math/.test(n))return'MAT';if(/fran/.test(n))return'FRA';if(/english|angl/.test(n))return'ANG';
+    if(/hist/.test(n))return'HIS';if(/g[ée]o/.test(n))return'GEO';if(/scien/.test(n))return'SCT';if(/ate|cr[ée]atic/.test(n))return'ATE';return null;};
+  for(const p of cr.publications||[]) for(const e of p.elements||[]){
+    const code=CRC(p.cours); if(!code||!P.profs[code]||P.profs[code].rec)continue;
+    const phrase=(e.detail||'').split(/\n|(?<=[.!?])\s+/).find(x=>/r[ée]cup[ée]ration/i.test(x)&&/\d{1,2}\s*h\s*\d{2}/.test(x));
+    if(phrase){P.profs[code].rec=phrase.trim().replace(/[`´]+$/,'');P.profs[code].src='C';}
+  }
+  // Activités : CapNet donne l'inscription et la période ; l'horaire vient d'un courriel
+  // (« Jours : Mardi et jeudi, de 15 h à 16 h 30 », « Lieu : … »). On les associe par un mot-clé commun.
+  const JOURS={dimanche:0,lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6};
+  const auj=(col.collecte_le||'').slice(0,10);
+  const sansAc=x=>(x||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+  const motsCles=t=>sansAc(t).split(/[^a-z0-9]+/).filter(w=>w.length>=5&&!['groupe','activite','activites','saison','reservistes'].includes(w));
+  const horaires=[];
+  for(const m of coba.courriels||[]){
+    const tx=m.texte||''; const lj=tx.match(/Jours?\s*:\s*([^\n]+)/i); if(!lj)continue;
+    const jours=Object.entries(JOURS).filter(([n])=>new RegExp(n,'i').test(lj[1])).map(([,v])=>v); if(!jours.length)continue;
+    const hh=lj[1].match(/de\s+(\d{1,2})\s*h\s*(\d{2})?\s*à\s*(\d{1,2})\s*h\s*(\d{2})?/i)||[];
+    const lieu=(tx.match(/Lieu\s*:\s*([^\n]+)/i)||[])[1];
+    horaires.push({objet:m.objet||'',texte:tx,jours,hh,lieu:lieu&&lieu.trim(),de:m.expediteur||''});
+  }
+  const inscrites=(Array.isArray(coba.activites)?coba.activites:[]).filter(a=>(!a.statut||/inscrit/i.test(a.statut))&&(!a.fin||a.fin>=auj));
+  for(const h of horaires){
+    const mh=new Set([...motsCles(h.objet),...motsCles(h.texte.slice(0,300))]);
+    // « basketball » ↔ « Lions Basketball » ; « basket » seul est trop court pour un mot-clé, on teste aussi la racine
+    const act=inscrites.find(a=>motsCles(a.titre).some(w=>mh.has(w)||[...mh].some(x=>x.startsWith(w.slice(0,6))||w.startsWith(x.slice(0,6)))));
+    const titre=act?(act.titre.split(' - ')[0].trim()):(h.objet||'Activité');
+    const d=h.hh;
+    P.activites.push({id:'act-'+sansAc(titre).replace(/[^a-z0-9]+/g,'-').slice(0,30),titre,code:'SPO',emoji:emojiActivite(titre,h.objet),jours:h.jours,
+      heure:d[1]?(+d[1])+'h'+(d[2]||'00'):'',debut:act?act.debut:null,jusqu_au:act?act.fin:null,
+      note:(d[1]?'De '+(+d[1])+'h'+(d[2]||'00')+' à '+(+d[3])+'h'+(d[4]||'00'):'')+(h.lieu?', '+h.lieu:'')+'. Horaire annoncé par courriel'+(h.de?' ('+h.de+')':'')+'.'});
+  }
+  if(hor.foyer)P.groupe=hor.foyer;
+  return P;
+}
+
+function convertirCollecte(col, profilExterne){
+const coba=col.coba||{}, cr=col.classroom||{};
+const profil=construireProfil(col);
+// compléter avec un profil importé à la main (ancien format), sans écraser ce qui vient de la collecte
+if(profilExterne){for(const [c,v] of Object.entries(profilExterne.profs||{}))if(!profil.profs[c])profil.profs[c]=v;
+  if(!profil.activites.length&&profilExterne.activites)profil.activites=profilExterne.activites;
+  if(profilExterne.cycle)profil.cycle=profilExterne.cycle;}
+// nom de famille du prof -> code de matière, tiré du profil (ex. « Tremblay » -> SCT)
+const PROF2CODE={};
+for(const [code,p] of Object.entries((profil&&profil.profs)||{})){const n=(p.p||'').trim().split(/\s+/).pop(); if(n&&!PROF2CODE[n])PROF2CODE[n]=code;}
+
+// --- Code de cours à 3 lettres (MAT, FRA…) à partir du code Coba (ex. MAT201) ou du cours Classroom ---
+const CODE3=c=>(c||'').slice(0,3).toUpperCase();
+const COURS_CONNUS={MAT:1,FRA:1,ANG:1,HIS:1,GEO:1,SCT:1,ATE:1,CCQ:1,DRA:1,EDU:1};
+// Classroom : "Mathématique(201)" -> MAT, "ATE groupe A" -> ATE, "English" -> ANG, "Géographie" -> GEO
+const CR2CODE=nom=>{const n=(nom||'').toLowerCase();
+  if(/math/.test(n))return'MAT'; if(/fran/.test(n))return'FRA'; if(/english|angl/.test(n))return'ANG';
+  if(/hist/.test(n))return'HIS'; if(/g[ée]o/.test(n))return'GEO'; if(/scien|sct/.test(n))return'SCT';
+  if(/ate|cr[ée]atic|tinker|impression|fablab/.test(n))return'ATE'; if(/cit|ccq/.test(n))return'CCQ';
+  if(/dram|th[ée][aâ]/.test(n))return'DRA'; if(/[ée]duc|sport|endurance/.test(n))return'EDU'; return null;};
+
+// --- Normaliser une heure "08:05" -> "8h05" ---
+const hh=t=>{const m=(t||'').match(/(\d{1,2}):(\d{2})/);return m?(+m[1])+'h'+m[2]:'';};
+
+// --- AGENDA daté : { "AAAA-MM-JJ": { cycle:5, periodes:[{h:"8h05",code:"MAT"},…] } } ---
+const DEBUTS=['08:05','09:30','12:15','13:40','15:05'];
+const AGENDA={};
+for(const j of coba.agenda||[]){
+  // seules les heures de début de période sont des cours ; « 23:59 » est une heure limite de remise
+  const per=(j.cours||[]).filter(c=>DEBUTS.includes(c.heure)).map(c=>({s:c.heure,code:CODE3(c.cours)})).sort((a,b)=>a.s.localeCompare(b.s));
+  AGENDA[j.date]={cycle:j.jour_cycle||null,periodes:per};
+}
+// Jours de semaine sans aucun cours dans l'agenda (congés, journées pédagogiques), sur la période couverte
+const CONGES={};
+{ const dates=Object.keys(AGENDA).sort(); if(dates.length){ const d=new Date(dates[0]+'T12:00'), fin=new Date(dates[dates.length-1]+'T12:00');
+  for(;d<=fin;d.setDate(d.getDate()+1)){ const w=d.getDay(), k=d.toISOString().slice(0,10);
+    if(w>0&&w<6&&(!AGENDA[k]||!AGENDA[k].periodes.length)) CONGES[k]='Aucun cours à l’agenda'; } } }
+
+// --- TRAVAUX / ÉVALUATIONS depuis Coba ---
+const TYPE=(cat,trav)=>{const t=((cat||'')+' '+(trav||'')).toLowerCase();
+  if(/examen|exam\b|test\b/.test(t))return'exam';
+  if(/\bsae\b/.test(t))return'sae';
+  if(/projet|recherche|bd\b|pr[ée]sentation/.test(t))return'projet';
+  if(/dict[ée]e/.test(t))return'test';
+  return'devoir';};
+const slug=s=>(s||'').toLowerCase().normalize('NFKD').replace(/[^\w]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+const auj=col.collecte_le.slice(0,10);
+const ITEMS=[];
+for(const t of coba.travaux||[]){
+  if(t.date_completee)continue;                  // déjà remis
+  if((t.resultat_brut||'').trim())continue;       // déjà noté -> ira dans NOTES
+  const code=CODE3(t.cours);
+  if(!t.date_due)continue;
+  const o={src:'P'};
+  if(t.heure_due)o.time=hh(t.heure_due);
+  if(t.description)o.note=t.description;
+  ITEMS.push({id:slug(code+'-'+t.travail),d:t.date_due,c:code,t:t.travail,ty:TYPE(t.categorie,t.travail),...o});
+}
+
+// --- Heure affichée : la période de cours où l'agenda place le travail ; « 23h59 » n'est qu'une heure limite ---
+const cleT=t=>(t||'').toLowerCase().replace(/\s+/g,'');
+const PERIODE={};
+for(const j of coba.agenda||[]) for(const c of j.cours||[]) for(const titre of c.travaux_lies||[]) PERIODE[j.date+'|'+cleT(titre)]=c.heure;
+for(const it of ITEMS){
+  const p=PERIODE[it.d+'|'+cleT(it.t)];
+  if(p&&DEBUTS.includes(p)) it.time=hh(p);
+  else if(it.time==='23h59') delete it.time;
+}
+
+// --- Travaux annoncés SEULEMENT dans l'agenda (pas encore dans Travaux) ---
+const vus=new Set(ITEMS.map(i=>i.c+'|'+i.t.toLowerCase().replace(/\s+/g,'')));
+for(const j of coba.agenda||[]) for(const c of j.cours||[]) for(const titre of c.travaux_lies||[]){
+  const code=CODE3(c.cours), k=code+'|'+titre.toLowerCase().replace(/\s+/g,'');
+  if(vus.has(k))continue; vus.add(k);
+  ITEMS.push({id:slug('ag-'+code+'-'+titre),d:j.date,c:code,t:titre,ty:TYPE('',titre),src:'P',time:hh(c.heure),fromAgenda:1});
+}
+
+// --- NOTES (résultats) et compétences ---
+const GRADES=[];
+for(const t of coba.travaux||[]){
+  const r=t.resultat; if(!r)continue;
+  if(r.type==='points'||r.type==='pourcentage'){const p=r.pct; if(p==null)continue;
+    GRADES.push({c:CODE3(t.cours),d:t.date_due||t.date_assignee,p:Math.round(p),l:t.travail+(r.type==='points'?` (${r.obtenu}/${r.sur})`:'')});}
+  else if(r.type==='cote')   // A, B, C+… : gardée telle quelle, jamais convertie en pourcentage
+    GRADES.push({c:CODE3(t.cours),d:t.date_due||t.date_assignee,p:null,cote:r.cote,l:t.travail});
+}
+// Notes provisoires de Coba, par compétence (seules celles qui ont une valeur)
+const PROVISOIRES={};
+for(const c of coba.competences||[]){
+  const m=String(c.note_provisoire||'').match(/([\d.,]+)\s*%/); if(!m)continue;
+  (PROVISOIRES[CODE3(c.cours)]=PROVISOIRES[CODE3(c.cours)]||[]).push({nom:c.nom,ponderation:c.ponderation,note:Math.round(parseFloat(m[1].replace(',','.')))});
+}
+// NOGRADE : travaux dont la date due est passée, sans résultat
+const NOGRADE=[];
+for(const t of coba.travaux||[]){
+  if((t.resultat_brut||'').trim())continue;
+  if(t.date_due&&t.date_due<auj&&!t.date_completee) NOGRADE.push([CODE3(t.cours),t.travail,t.date_due]);
+}
+
+// --- SUIVI ---
+const sv=coba.suivi||{};
+const somme=sv.sommaire_coba||{};
+const pos=somme['Commentaire positif']||0;
+const tips=Object.entries(somme).filter(([k])=>!/positif|aucun/i.test(k)).reduce((a,[,v])=>a+v,0);
+const SUIVI={pos,tips,entrees:(sv.entrees||[]).map(e=>({d:(e.date_libelle||'').slice(0,10),c:null,type:e.type,comm:e.commentaire,detail:e.detail||'',prof:e.enseignant}))};
+
+// --- CONSIGNES EN ÉTAPES depuis Classroom ---
+// Rattachement à un travail Coba par un mot significatif commun, dans le même cours.
+const sansAcc=x=>(x||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+const VIDES=new Set(['examen','etude','sections','section','etape','partie','travail','devoir','document','plan','questions','consignes','sujet']);
+const mots=t=>new Set(sansAcc(t).split(/[^a-z0-9]+/).filter(w=>w.length>=5&&!VIDES.has(w)));
+const CONSIGNES=[];
+for(const p of cr.publications||[]) for(const e of p.elements||[]){
+  if(!(e.etapes&&e.etapes.length))continue;
+  const code=CR2CODE(p.cours), m=mots(e.titre);
+  const corresp=(coba.travaux||[]).filter(t=>CODE3(t.cours)===code&&[...mots(t.travail)].some(w=>m.has(w)));
+  const steps=e.etapes.map(x=>x.texte);
+  if(corresp.length){
+    const avenir=corresp.filter(t=>t.date_due&&t.date_due>=auj&&!(t.resultat_brut||'').trim());
+    for(const t of avenir){const it=ITEMS.find(i=>i.c===code&&i.t===t.travail); if(it){it.steps=steps; it.src='PC'; it.stepsDe=e.titre;}}
+    continue;   // rattachée : à venir -> dans la fiche ; passée -> écartée
+  }
+  if(e.nature_date==='echeance'&&e.date&&e.date<auj)continue;                       // échéance passée
+  const age=e.date?Math.round((new Date(auj)-new Date(e.date))/864e5):0;
+  if(e.nature_date!=='aucune_echeance'&&e.nature_date!=='echeance'&&age>21)continue;   // matériel ancien
+  CONSIGNES.push({id:slug('cons-'+code+'-'+e.titre),d:e.date||auj,c:code||'EVT',t:e.titre,ty:'consigne',src:'C',steps,
+    quand:e.nature_date==='echeance'?'Échéance : '+e.date:e.nature_date==='aucune_echeance'?'Aucune échéance':'Publié le '+e.date});
+}
+
+// --- RÉCUPS et faits depuis les courriels (IA) ---
+const RECUPS=[];
+for(const m of coba.courriels||[]) for(const f of ((m.extraction||{}).elements||[])){
+  if(f.a_valider)continue;
+  if(f.type==='recuperation'&&f.date){
+    const code=CR2CODE(m.objet)||PROF2CODE[(m.expediteur||'').trim().split(/\s+/).pop()]||null;
+    const h=(f.citation||'').match(/(\d{1,2})\s*h\s*(\d{2})/); const loc=(f.citation||'').match(/local\s+([A-Z]?\d+[A-Z]?)/i);
+    RECUPS.push({id:slug('rec-'+f.date),d:f.date,ty:'recup',c:code||'EVT',t:'Récupération',time:h?(+h[1])+'h'+h[2]:'',note:(loc?'Local '+loc[1]+'. ':'')+'Annoncée par courriel par '+m.expediteur+'.',src:'P'});
+  }
+}
+// --- ANNONCES CLASSROOM (résumés des tuteurs) ---
+// 1. Calendriers datés, ligne par ligne, sans IA : « October 22nd: New Kid chap.9-10 », « 22 octobre : … ».
+//    Les lignes de test/examen sont ignorées : les évaluations viennent de la page Travaux de Coba.
+// 2. Récups et événements trouvés par l'IA, rattachés au cours de l'annonce.
+const MOIS_EN2={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+const MOIS_FR2={janv:1,févr:2,fevr:2,mars:3,avr:4,mai:5,juin:6,juil:7,août:8,aout:8,sept:9,oct:10,nov:11,déc:12,dec:12};
+const ANNONCES=[];
+const heureTexte=s=>{const m=(s||'').match(/\b(\d{1,2})(?:[:h](\d{2}))?\s*(am|pm)\b/i)||(s||'').match(/\b(\d{1,2})\s*[h:]\s*(\d{2})?/i);
+  if(!m)return'';let h=+m[1];if(m[3]&&/pm/i.test(m[3])&&h<12)h+=12;return h+'h'+(m[2]||'00');};
+for(const a of cr.annonces||[]){
+  const code=CR2CODE(a.cours)||'EVT', pub=(a.publie_le||'').slice(0,10);
+  const an=mo=>{let y=+pub.slice(0,4)||+auj.slice(0,4);if(pub&&mo<+pub.slice(5,7)-6)y++;return y;};
+  const changeant=/might change|may change|peuvent changer|sujettes? à changement/i.test(a.texte||'');
+  const quand=pub?' du '+pub:'';
+  for(const l of (a.texte||'').split('\n')){
+    let m,d=null,t=null;
+    if((m=l.match(/^\s*(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?\s*[:\-–]\s*(.+)$/i))){const mo=MOIS_EN2[m[1].toLowerCase()];d=an(mo)+'-'+String(mo).padStart(2,'0')+'-'+m[2].padStart(2,'0');t=m[3];}
+    else if((m=l.match(/^\s*(\d{1,2})(?:er)?\s+(janv|févr|fevr|mars|avr|mai|juin|juil|août|aout|sept|oct|nov|déc|dec)[a-zéû]*\.?\s*[:\-–]\s*(.+)$/i))){const mo=MOIS_FR2[m[2].toLowerCase()];d=an(mo)+'-'+String(mo).padStart(2,'0')+'-'+m[1].padStart(2,'0');t=m[3];}
+    if(!d||!t)continue;
+    t=t.trim(); if(/\b(test|examen|exam|quiz|évaluation)\b/i.test(t))continue;
+    ANNONCES.push({id:slug('ann-'+code+'-'+d+'-'+t),d,c:code,t,ty:/r[ée]vision|review|class\b/i.test(t)?'event':'devoir',src:'C',fromAnnonce:1,
+      note:'Annonce Classroom'+quand+(a.auteur?' ('+a.auteur+')':'')+'.'+(changeant?' Le prof précise que ces dates peuvent changer.':'')});
+  }
+  for(const f of ((a.extraction||{}).elements||[])){
+    if(f.a_valider||!f.date)continue;
+    if(f.type==='recuperation'){
+      const locs=[...new Set(((f.citation||'').match(/\b[A-Z]\d{3}[A-Z]?\b/g)||[]))], loc=locs.length===1?[null,locs[0]]:null;   // plusieurs locaux cités : la phrase du prof fait foi
+      RECUPS.push({id:slug('rec-'+code+'-'+f.date+'-'+heureTexte(f.heure_ou_periode||f.citation)),d:f.date,ty:'recup',c:code,t:'Récupération',time:heureTexte(f.heure_ou_periode||f.citation),
+        note:(loc?'Local '+loc[1]+'. ':'')+'« '+(f.citation||'').trim()+' » — annonce Classroom'+(a.auteur?' de '+a.auteur:'')+'.',src:'C'});
+    } else if(f.type==='evenement'){
+      ANNONCES.push({id:slug('ann-ev-'+code+'-'+f.date+'-'+(f.titre||'')),d:f.date,c:code,t:f.titre||'Activité',ty:'event',src:'C',time:heureTexte(f.heure_ou_periode||f.citation),
+        note:'Annonce Classroom'+(a.auteur?' ('+a.auteur+')':'')+'.',fromAnnonce:1});
+    }
+  }
+}
+// une même récup annoncée plusieurs fois (rappel la veille, etc.) : une seule fois
+{const vus=new Set();for(let i=RECUPS.length-1;i>=0;i--){const k=RECUPS[i].c+'|'+RECUPS[i].d+'|'+RECUPS[i].time;if(vus.has(k))RECUPS.splice(i,1);else vus.add(k);}}
+
+// --- ÉVÉNEMENTS annoncés par courriel (match, atelier, activité) : datés et validés seulement.
+// Les examens et travaux restent ceux de la page Travaux de Coba, qui fait foi.
+const EVENEMENTS=[], vusEv=new Set();
+const motsAct=(profil.activites||[]).map(a=>({a,mots:(a.titre||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>=5)}));
+for(const m of coba.courriels||[]){
+  if(m.suivi||m.ia_ignore)continue;
+  for(const f of ((m.extraction||{}).elements||[])){
+    if(f.a_valider||f.type!=='evenement'||!f.date)continue;
+    const cle=f.date+'|'+(f.titre||'').toLowerCase().replace(/\s+/g,''); if(vusEv.has(cle))continue; vusEv.add(cle);
+    // activité de l'élève concernée ? (ex. un match de basket) -> son code et son emoji
+    const zone=((m.objet||'')+' '+(m.texte||'').slice(0,600)).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+    const act=motsAct.find(x=>x.mots.some(w=>zone.includes(w)||zone.includes(w.slice(0,6))));
+    const code=act?'SPO':(CR2CODE(m.objet)||PROF2CODE[(m.expediteur||'').trim().split(/\s+/).pop()]||'EVT');
+    const h=(f.heure_ou_periode||f.citation||'').match(/\b(\d{1,2})\s*[h:]\s*(\d{2})?/i);   // « 15h00 », « 10:00 Am », « 10h »
+    const o={src:'P',note:(f.details?f.details+' ':'')+'Annoncé par courriel'+(m.expediteur?' ('+m.expediteur+')':'')+'.',fromCourriel:1};
+    if(h)o.time=(+h[1])+'h'+(h[2]||'00');
+    if(act){o.emoji=act.a.emoji;o.nomCourt=act.a.titre;}
+    // titre court ou générique (« Atelier 1 ») : préfixé par l'objet du courriel (« Club photo : Atelier 1 »)
+    let t=(f.titre||'').trim(); const obj=(m.objet||'').replace(/^(re|tr|fwd?)\s*:\s*/gi,'').trim();
+    const generique=/^(atelier|s[ée]ance|rencontre|cours|partie|session|activit[ée]|[ée]v[ée]nement|groupe|bloc)\s*\d*$/i.test(t);
+    if(!t)t=obj||'Événement'; else if(obj&&generique&&!obj.toLowerCase().includes(t.toLowerCase()))t=obj+' : '+t;
+    EVENEMENTS.push({id:slug('crl-'+f.date+'-'+t),d:f.date,c:code,t,ty:'event',...o});
+  }
+}
+
+return {
+  type:'mon-cap-donnees',version:1,
+  genere_le:col.collecte_le,
+  agenda:AGENDA,
+  conges:CONGES,
+  items:ITEMS.concat(ANNONCES),
+  grades:GRADES,
+  provisoires:PROVISOIRES,
+  nograde:NOGRADE,
+  suivi:SUIVI,
+  consignes:CONSIGNES,
+  recups:RECUPS,
+  evenements:EVENEMENTS,
+  profil
+};
+}
+
+
+const VIDE={type:'mon-cap-donnees',genere_le:null,agenda:{},conges:{},items:[],evenements:[],grades:[],provisoires:{},nograde:[],suivi:{pos:0,tips:0,entrees:[]},consignes:[],recups:[]};
+const lireJSON=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}};
+const COLLECTE=Object.assign({},VIDE,lireJSON('mon-cap-donnees')||{});
+/* Le profil (profs, locaux, récups, activités) vient de la collecte ; un ancien profil importé sert de secours. */
+const PROFIL=COLLECTE.profil||lireJSON('mon-cap-profil')||{profs:{},activites:[],cycle:null};
+const A_DONNEES=!!COLLECTE.genere_le;
+const DATA_DATE='';
+const COURSES={
+  MAT:{n:'Math',e:'🔢',c:'#1971C2',fg:'#FFFFFF'},
+  FRA:{n:'Français',e:'📚',c:'#C2255C',fg:'#FFFFFF'},
+  ANG:{n:'Anglais',e:'🗣️',c:'#6741D9',fg:'#FFFFFF'},
+  HIS:{n:'Histoire',e:'🏺',c:'#B8470B',fg:'#FFFFFF'},
+  GEO:{n:'Géo',e:'🌍',c:'#2B8A3E',fg:'#FFFFFF'},
+  SCT:{n:'Science',e:'🔬',c:'#0B7285',fg:'#FFFFFF'},
+  ATE:{n:'Créatic',e:'🛠️',c:'#F59F00',fg:'#15193D'},
+  CCQ:{n:'Citoyenneté',e:'⚖️',c:'#9C36B5',fg:'#FFFFFF'},
+  DRA:{n:'Art dram.',e:'🎭',c:'#5C7080',fg:'#FFFFFF'},
+  EDU:{n:'Éduc',e:'🏃',c:'#495057',fg:'#FFFFFF'},
+  EVT:{n:'École',e:'🎒',c:'#495057',fg:'#FFFFFF'},
+  SPO:{n:'Activité',e:'🏅',c:'#D9480F',fg:'#FFFFFF'}
+};
+const SRC={P:'🏫 Coba',C:'🎓 Classroom',M:'✍️ ajout manuel (sur cet appareil)'};
+const TYPES=[['devoir','📤 Travail à remettre'],['exam','⭐ Examen ou test'],['projet','⭐ SAE ou projet'],['recup','🛟 Récup'],['bring','🎒 À apporter']];
+const I=(id,d,c,t,ty,o)=>Object.assign({id:id,d:d,c:c,t:t,ty:ty},o||{});
+const ITEMS=COLLECTE.items.concat(COLLECTE.recups,COLLECTE.evenements||[]);const NOGRADE=COLLECTE.nograde;const GRADES=COLLECTE.grades;const SUIVI=COLLECTE.suivi;
+const CONSIGNES=COLLECTE.consignes;
+const CYC=(PROFIL.cycle&&PROFIL.cycle.grille)||[];
+const SLOTS=[['08:05','09:20'],['09:30','10:45'],['12:15','13:30'],['13:40','14:55']];
+const LUNCH=['10:55','12:10'];
+const CY=PROFIL.cycle||{},REF=CY.ref||'',REF_DAY=CY.jour_ref||1,CYC_FROM=CY.du||'',CYC_TO=CY.au||'',CYC_N=CY.longueur||19;
+const PRE_DONE=[];
+const PROFS=PROFIL.profs||{};
+const TITULAIRE_C='MAT';
+const BIG={exam:1,sae:1,projet:1};
+const WORK={devoir:1,test:1,projet:1,exam:1,sae:1};
+
+/* ===== Dates ===== */
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2]);};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d);};
+const diffDays=(a,b)=>Math.round((parse(a)-parse(b))/864e5);
+const DOW=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+const DOWL=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const CONGES=COLLECTE.conges; /* jours de semaine sans cours dans l’agenda de Coba */
+const isSchool=s=>{const w=parse(s).getDay();return w>0&&w<6&&!CONGES[s];};
+const NOW=new Date(),TODAY=ymd(NOW),NOWMIN=NOW.getHours()*60+NOW.getMinutes();
+const toMin=t=>{const a=t.split(':').map(Number);return a[0]*60+a[1];};
+const hh=t=>{const a=t.split(':');return Number(a[0])+'h'+a[1];};
+const fmt=d=>{const x=parse(d);return DOW[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()];};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function when(d){const n=diffDays(d,TODAY);if(n===0)return 'aujourd’hui';if(n===1)return 'demain';if(n===-1)return 'hier';if(n>1&&n<7)return DOWL[parse(d).getDay()];if(n>=7)return 'dans '+n+' jours';return 'il y a '+(-n)+' jours';}
+function nextSchool(s){let d=s;do{d=addDays(d,1);}while(!isSchool(d));return d;}
+const AG=COLLECTE.agenda, AG_FIN=Object.keys(AG).sort().pop()||CYC_TO;
+const finDe=s=>{const m=toMin(s)+75;return pad(Math.floor(m/60))+':'+pad(m%60);};
+/* Périodes réelles d’un jour : agenda de Coba si disponible, sinon cycle calculé */
+function periodes(d){
+  if(AG[d])return AG[d].periodes.map(x=>({s:x.s,e:finDe(x.s),code:x.code}));
+  const cd=cycleDayCalc(d);if(!cd)return [];
+  return SLOTS.map((s,p)=>({s:s[0],e:s[1],code:CYC[p][cd-1]}));
+}
+function cycleDay(s){if(AG[s])return AG[s].cycle||null;return cycleDayCalc(s);}
+function cycleDayCalc(s){
+  if(!CYC.length||!isSchool(s)||s<CYC_FROM||s>CYC_TO)return null;
+  let n=0,cur=REF;
+  if(s>=REF){while(cur<s){cur=addDays(cur,1);if(isSchool(cur))n++;}}
+  else{while(cur>s){if(isSchool(cur))n--;cur=addDays(cur,-1);}}
+  return (((REF_DAY-1+n)%CYC_N)+CYC_N)%CYC_N+1;
+}
+const NEXT=nextSchool(TODAY);
+
+/* ===== État : seulement les cases cochées ===== */
+const KEY='mon-cap-v2';
+function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
+let S=load();
+PRE_DONE.forEach(id=>{if(S.done[id]==null)S.done[id]=true;});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const UI={tab:'jour',day:(isSchool(TODAY)&&NOWMIN<15*60)?'today':'next',week:0,sheet:null,last:null};
+
+/* ===== Calculs ===== */
+/* Activités régulières du profil (ex. un entraînement le mardi et le jeudi) */
+function basket(){const out=[];for(const a of PROFIL.activites||[]){const fin=a.jusqu_au||addDays(TODAY,60);let d=addDays(TODAY,-7);
+  while(d<=fin){if((a.jours||[]).includes(parse(d).getDay()))out.push(I((a.id||'act')+'-'+d,d,a.code||'SPO',a.titre,'event',{src:'P',time:a.heure||'',note:a.note||'',emoji:a.emoji||(typeof emojiActivite==='function'?emojiActivite(a.titre||''):'🏅'),nomCourt:a.titre}));d=addDays(d,1);}}return out;}
+function all(){return ITEMS.concat(basket(),S.custom||[]);}
+function find(id){return all().find(i=>i.id===id)||CONSIGNES.find(i=>i.id===id)||null;}
+const W={exam:0,sae:1,projet:2,test:2,devoir:3,recup:4,event:4,jalon:5};
+const byDate=(a,b)=>a.d<b.d?-1:a.d>b.d?1:(W[a.ty]-W[b.ty]);
+const isDone=id=>!!S.done[id];
+const isEv=i=>!WORK[i.ty];
+const co=i=>{const b=COURSES[i.c]||COURSES.EVT;return i.emoji?Object.assign({},b,{e:i.emoji,n:i.nomCourt||b.n}):b;};
+const cv=c=>'--c:'+c.c+';--fg:'+c.fg;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const srcText=s=>String(s||'').split('').map(k=>SRC[k]).filter(Boolean).join(' et ');
+function typeChip(i,mode){
+  if(mode==='due'&&!BIG[i.ty])return i.ty==='test'?'<span class="chip">Test</span>':'';
+  if(mode==='eval'){const L={exam:'Examen',sae:'SAE',projet:'Projet'}[i.ty];return L?'<span class="chip">'+L+'</span>':'';}
+  if(i.ty==='exam')return '<span class="chip star">⭐ Examen</span>';
+  if(i.ty==='sae')return '<span class="chip star">⭐ SAE</span>';
+  if(i.ty==='projet')return '<span class="chip star">⭐ Projet</span>';
+  if(i.ty==='test')return '<span class="chip">📤 Test</span>';
+  if(i.ty==='devoir')return '<span class="chip">📤 À remettre</span>';
+  if(i.ty==='recup')return '<span class="chip">🛟 Récup</span>';
+  if(i.ty==='bring')return '<span class="chip">🎒 À apporter</span>';
+  if(i.ty==='consigne')return '<span class="chip">📋 '+esc(i.quand||'Consigne')+'</span>';
+  return '';
+}
+
+/* ===== Gabarits ===== */
+function tile(i,o){
+  o=o||{};const c=co(i),dn=isDone(i.id),ev=isEv(i);
+  const chips='<span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i,o.mode)+(o.date?'<span class="chip">'+esc(cap(when(i.d)))+'</span>':'')+(i.time?'<span class="chip">'+esc(i.time)+'</span>':'')+(i.src==='M'?'<span class="chip">✍️ Ajouté</span>':'');
+  const left=ev?'<div class="emo" aria-hidden="true">'+c.e+'</div>':'<button class="chk" data-act="toggle" data-id="'+i.id+'" aria-pressed="'+dn+'" aria-label="'+(dn?'Pas encore fait : ':'Fait : ')+esc(i.t)+'"><span class="box">'+(dn?'✓':'')+'</span></button>';
+  return '<div class="tile'+(dn?' done':'')+(UI.pop==='d:'+i.id?' pop':'')+'" style="'+cv(c)+'"><div class="band"></div>'+left+'<button class="body" data-act="open" data-id="'+i.id+'"><span class="title">'+esc(i.t)+'</span><span class="chips">'+chips+'</span></button></div>';
+}
+function fold(id,sum,body){return '<details class="fold" data-fold="'+id+'"'+(S.open[id]?' open':'')+'><summary>'+sum+'</summary><div>'+body+'</div></details>';}
+
+function renderTop(){$('#top').innerHTML='';return;
+  const d=UI.tab==='jour'&&UI.day==='next'?NEXT:TODAY,cd=cycleDay(TODAY);
+  $('#top').innerHTML='<h1>'+esc(cap(DOWL[parse(TODAY).getDay()]))+' '+parse(TODAY).getDate()+' '+MON[parse(TODAY).getMonth()]+'</h1><p>'+(cd?'Jour '+cd+' du cycle':(isSchool(TODAY)?'':'Pas d’école aujourd’hui'))+'</p>';
+}
+function renderTabs(){
+  const T=[['jour','📅','Jour'],['semaine','🗓️','Semaine'],['gros','⭐','Évaluations'],['notes','📈','Suivi']];
+  const bt=t=>'<button data-act="tab" data-v="'+t[0]+'"'+(UI.tab===t[0]?' aria-current="page"':'')+'><span aria-hidden="true">'+t[1]+'</span>'+t[2]+'</button>';
+  $('#tabs').innerHTML=bt(T[0])+bt(T[1])+'<button class="plus" data-act="add" aria-label="Ajouter quelque chose"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>'+bt(T[2])+bt(T[3]);
+}
+
+/* ===== Jour (aujourd'hui ou demain) ===== */
+function bringRows(d){
+  const rows=[],cd=cycleDay(d),extra=[],used={};
+  all().filter(i=>i.d===d&&i.bring).sort(byDate).forEach(i=>i.bring.forEach(b=>extra.push({c:i.c,r:{k:i.id+'|'+b,t:b,s:i.src==='M'?'✍️ Ajouté par toi':'Demandé pour : '+i.t,sub:true,id:i.src==='M'?i.id:null}})));
+  const per=periodes(d);
+  if(per.length){for(const x of per){const code=x.code;if(used[code])continue;used[code]=1;const c=COURSES[code]||COURSES.EVT;
+    const times=per.filter(q=>q.code===code).map(q=>hh(q.s)).join(' et ');
+    rows.push({k:'cours|'+code,t:c.e+' Matériel : '+c.n,s:'Cours à '+times});
+    extra.filter(x=>x.c===code).forEach(x=>rows.push(x.r));}}
+  extra.filter(x=>!used[x.c]).forEach(x=>rows.push(Object.assign({},x.r,{sub:false})));
+  return rows;
+}
+function homeRows(){
+  let lim=TODAY;for(let k=0;k<3;k++)lim=nextSchool(lim);
+  const items=all().filter(i=>WORK[i.ty]&&i.d>TODAY&&i.d<=lim&&!isDone(i.id)).sort(byDate),by={},order=[];
+  items.forEach(i=>{if(!by[i.c]){by[i.c]=[];order.push(i.c);}by[i.c].push(i);});
+  return order.map(code=>{const c=COURSES[code];return{k:code,t:c.e+' Matériel : '+c.n,s:'Pour : '+by[code].map(i=>i.t+' ('+when(i.d)+')').join(', ')};});
+}
+function checkList(kind,d,rows,empty){
+  if(!rows.length)return '<div class="empty">'+esc(empty)+'</div>';
+  const st=(S[kind]||{})[d]||{},n=rows.filter(r=>st[r.k]).length;
+  return '<div class="bring">'+rows.map(r=>'<div class="blr"><label class="bl'+(r.sub?' sub':'')+(st[r.k]?' on':'')+(UI.pop==='c:'+kind+d+r.k?' pop':'')+'"><input type="checkbox" data-act="chk" data-kind="'+kind+'" data-d="'+d+'" data-k="'+esc(r.k)+'"'+(st[r.k]?' checked':'')+'><span><span class="t">'+esc(r.t)+'</span><small>'+esc(r.s)+'</small></span></label>'+(r.id?'<button class="ed" data-act="open" data-id="'+r.id+'" aria-label="Modifier ou supprimer">›</button>':'')+'</div>').join('')+'</div><p class="src" style="margin:6px 0 0">'+n+'/'+rows.length+' prêt'+(n===rows.length?' ✓':'')+'</p>';
+}
+function timeline(d){
+  const per=periodes(d);if(!per.length)return '<p class="muted">'+(CONGES[d]?'Aucun cours à l’agenda ce jour-là.':'Horaire pas encore disponible pour ce jour.')+'</p>';
+  const items=all().filter(i=>i.d===d),isT=d===TODAY;
+  const rows=[];let diner=false;per.forEach(x=>{if(!diner&&toMin(x.s)>=toMin(LUNCH[1])){rows.push({s:LUNCH[0],e:LUNCH[1],lunch:true});diner=true;}rows.push(x);});if(!diner)rows.push({s:LUNCH[0],e:LUNCH[1],lunch:true});
+  let h='';
+  rows.forEach(r=>{
+    const now=isT&&NOWMIN>=toMin(r.s)&&NOWMIN<=toMin(r.e),past=isT&&NOWMIN>toMin(r.e);
+    const cls=now?' now':past?' past':'';
+    if(r.lunch){
+      const rc=items.filter(i=>i.ty==='recup');
+      h+='<div class="slot lunch'+cls+'"><time>'+hh(r.s)+'</time><div class="blk" style="--c:var(--line)"><span>Dîner</span>'+(rc.length?'<span class="chips">'+rc.map(i=>'<button class="chip rc" data-act="open" data-id="'+i.id+'">🛟 Récup '+esc(co(i).n.toLowerCase())+(i.time&&/^\d/.test(i.time)?' à '+esc(i.time):'')+(i.src==='M'?' ✍️':'')+' ›</button>').join('')+'</span>':'')+'</div></div>';
+      return;
+    }
+    const c=COURSES[r.code]||COURSES.EVT,big=items.filter(i=>i.c===r.code&&BIG[i.ty]);
+    h+='<div class="slot'+cls+'"><time>'+hh(r.s)+'</time><button class="blk cbtn" data-act="course" data-c="'+r.code+'" style="'+cv(c)+'"><b>'+c.e+' '+esc(c.n)+'</b>'+(big.length?'<span class="chips">'+big.map(i=>'<span class="chip star">⭐ '+esc(i.t)+'</span>').join('')+'</span>':'')+'</button></div>';
+  });
+  items.filter(i=>i.ty==='event'&&(i.c==='EVT'||i.c==='SPO')&&i.time&&/^\d/.test(i.time)).forEach(i=>{
+    h+='<div class="slot"><time>'+esc(i.time.replace('h00','h'))+'</time><div class="blk" style="'+cv(co(i))+'"><b>'+co(i).e+' '+esc(i.t)+'</b></div></div>';
+  });
+  return h;
+}
+function renderJour(){
+  const d=UI.day==='today'?TODAY:NEXT;
+  const nl=diffDays(NEXT,TODAY)===1?'Demain':cap(DOWL[parse(NEXT).getDay()]);
+  let h='<div class="seg" role="group" aria-label="Jour"><button data-act="day" data-v="today" aria-pressed="'+(UI.day==='today')+'">Aujourd’hui</button><button data-act="day" data-v="next" aria-pressed="'+(UI.day==='next')+'">'+esc(nl)+'</button></div>';
+  {const x=parse(d),cdd=cycleDay(d);h+='<div class="dayhead'+(d!==TODAY?' r':'')+'"><h1>'+esc(cap(DOWL[x.getDay()]))+' '+x.getDate()+' '+MON[x.getMonth()]+'</h1><p>'+(cdd?'Jour '+cdd+' du cycle':(isSchool(d)?'':(CONGES[d]||'Pas d’école')))+'</p></div>';}
+  // Prochain gros projet
+  const nb=all().filter(i=>BIG[i.ty]&&i.d>=TODAY&&!isDone(i.id)).sort(byDate)[0];
+  if(nb&&diffDays(nb.d,TODAY)<=7){const c=co(nb);h='<button class="hero hero-s" style="'+cv(c)+'" data-act="open" data-id="'+nb.id+'"><small>Prochaine évaluation</small><b>'+esc(nb.t)+'</b><span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="chip">'+esc(cap(when(nb.d)))+(nb.time?' à '+esc(nb.time):'')+'</span></span></button>'+h;}
+  const isT=d===TODAY,school=isSchool(d);
+  if(isT&&school)h+='<section class="sec"><h2 class="sh"><span>🎒 Avant de partir</span></h2><p class="hint">À apporter à l’école aujourd’hui</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour aujourd’hui.')+'</section>';
+  if(d!==TODAY||isSchool(TODAY)){
+    const cd=cycleDay(d);
+    h+='<section class="sec"><h2>Horaire</h2>'+timeline(d)+'</section>';
+  }
+  const due=all().filter(i=>i.d===d&&WORK[i.ty]).sort(byDate);
+  if(isT&&!school)h+='<div class="empty" style="margin-bottom:26px">'+esc(CONGES[d]||'Pas d’école aujourd’hui.')+' Touche « '+esc(nl)+' » pour préparer la suite.</div>';else
+  h+='<section class="sec"><h2 class="sh"><span>📤 À remettre '+(isT?'aujourd’hui':esc(when(d)))+'</span></h2>'+(due.length?due.map(i=>tile(i,{mode:'due'})).join(''):'<div class="empty">Rien à remettre.</div>')+'</section>';
+  if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
+  if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
+  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'. <button class="lien" data-act="importer">Mettre à jour</button></p>';
+  $('#view').innerHTML=h;
+}
+/* Importer : collecte de l'extension, données préparées ou profil. Rien ne quitte le téléphone. */
+function importer(){const f=document.getElementById('fic');f.value='';f.onchange=e=>{const x=e.target.files[0];if(x)traiterImport(x);};f.click();}
+function traiterImport(file){
+  const r=new FileReader();
+  r.onload=()=>{let o;try{o=JSON.parse(r.result);}catch(e){alert('Ce fichier n’est pas un fichier Mon Cap valide.');return;}
+    try{
+      if(o.type==='mon-cap-profil'){localStorage.setItem('mon-cap-profil',JSON.stringify(o));alert('Profil importé.');}
+      else if(o.type==='mon-cap-donnees'||(o.agenda&&o.items)){localStorage.setItem('mon-cap-donnees',JSON.stringify(o));}
+      else if(o.coba||o.classroom){localStorage.setItem('mon-cap-donnees',JSON.stringify(convertirCollecte(o,lireJSON('mon-cap-profil'))));}
+      else{alert('Fichier non reconnu : il faut une collecte de l’extension, ou un profil Mon Cap.');return;}
+      location.reload();
+    }catch(e){alert('Import impossible : '+e.message);}
+  };
+  r.readAsText(file);
+}
+/* « il y a 3 h », « hier », « il y a 5 jours » */
+function ilya(iso){
+  const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
+  if(m<2)return 'à l’instant';if(m<60)return 'il y a '+m+' min';
+  const hrs=Math.round(m/60);if(hrs<24)return 'il y a '+hrs+' h';
+  const j=Math.round(hrs/24);return j===1?'hier':'il y a '+j+' jours';
+}
+
+/* ===== Semaine ===== */
+function renderSemaine(){
+  const mon0=addDays(TODAY,-((parse(TODAY).getDay()+6)%7)),mon=addDays(mon0,7*UI.week);
+  const fr=parse(mon),to=parse(addDays(mon,4));
+  const chev=d=>'<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="'+(d<0?'M15 5l-7 7 7 7':'M9 5l7 7-7 7')+'" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let h='<div class="wnav"><button class="wbtn" data-act="week" data-v="'+(UI.week-1)+'" aria-label="Semaine précédente"'+(UI.week<=0?' disabled':'')+'>'+chev(-1)+'</button><button class="wt" data-act="wpick" aria-label="Choisir une semaine"><b>'+NOMS_SEM[UI.week]+'</b><span>du '+fr.getDate()+(fr.getMonth()!==to.getMonth()?' '+MON[fr.getMonth()]:'')+' au '+to.getDate()+' '+MON[to.getMonth()]+'</span></button><button class="wbtn" data-act="week" data-v="'+(UI.week+1)+'" aria-label="Semaine suivante"'+(UI.week>=NB_SEM-1?' disabled':'')+'>'+chev(1)+'</button></div>';
+  {const m=statsSemaine(mon);h+='<div class="wstat"><div><b>'+m.rem+'</b><span>📤 à remettre</span></div><div><b>'+m.ev+'</b><span>⭐ évaluations</span></div><div><b>'+m.rec+'</b><span>🛟 récups</span></div></div>';}
+  for(let k=0;k<7;k++){
+    const d=addDays(mon,k),list=all().filter(i=>i.d===d).sort(byDate);
+    if(!isSchool(d)&&!list.length&&!CONGES[d])continue;
+    const cd=cycleDay(d),big=list.filter(i=>BIG[i.ty]).length,work=list.filter(i=>i.ty==='devoir'||i.ty==='test').length;
+    const key='day-'+d,open=S.open[key]!=null?S.open[key]:d===TODAY;
+    const cnt=(big?'<span>⭐ '+big+'</span>':'')+(work?'<span>📤 '+work+'</span>':'')+(list.some(i=>i.ty==='recup')?'<span>🛟</span>':'')+([...new Set(list.filter(i=>i.c==='SPO').map(i=>i.emoji||'🏅'))].map(e=>'<span>'+e+'</span>').join(''));
+    h+='<details class="day'+(d===TODAY?' today':'')+(d<TODAY?' past':'')+'" data-fold="'+key+'"'+(open?' open':'')+'><summary><div class="dn"><b>'+esc(cap(DOWL[parse(d).getDay()]))+' '+parse(d).getDate()+'</b>'+(cd?'<span class="muted">jour '+cd+'</span>':'')+'</div><div class="cnt">'+(cnt||'<span class="muted" style="font-weight:400">rien</span>')+'<span class="chev" aria-hidden="true">▾</span></div></summary><div>';
+    const per=periodes(d);
+    if(per.length)h+='<div class="mini">'+per.map(x=>{const c=COURSES[x.code]||COURSES.EVT;return '<span style="'+cv(c)+'">'+c.e+' '+esc(c.n)+'</span>';}).join('')+'</div>';
+    else if(CONGES[d])h+='<p class="muted" style="margin:0 0 10px">Aucun cours à l’agenda.</p>';
+    h+=list.length?list.map(i=>tile(i)).join(''):'<p class="muted" style="margin:0 0 10px">Rien de prévu.</p>';
+    h+='</div></details>';
+  }
+  if(CONSIGNES.length)h+='<hr class="sep">'+fold('consignes','📋 Consignes des profs ('+CONSIGNES.length+')','<p class="muted" style="margin-top:0">Consignes en étapes publiées dans '+SRC.C+', sans date de remise dans Coba.</p>'+CONSIGNES.map(i=>tile(i)).join(''));
+  h+='<p class="src">⭐ évaluation · 📤 travail à remettre · 🛟 récup'+(PROFIL.activites||[]).map(a=>' · '+(a.emoji||'🏅')+' '+esc(a.titre)).join('')+'</p>';
+  $('#view').innerHTML=h;
+}
+
+/* Semaines affichées et métriques */
+const NB_SEM=6;
+const NOMS_SEM=['Cette semaine','Semaine prochaine','Dans 2 semaines','Dans 3 semaines','Dans 4 semaines','Dans 5 semaines'];
+function lundi(k){return addDays(addDays(TODAY,-((parse(TODAY).getDay()+6)%7)),7*k);}
+function statsSemaine(mon){
+  const fin=addDays(mon,6),l=all().filter(i=>i.d>=mon&&i.d<=fin);
+  return {rem:l.filter(i=>(i.ty==='devoir'||i.ty==='test')&&!isDone(i.id)).length,ev:l.filter(i=>BIG[i.ty]&&!isDone(i.id)).length,rec:l.filter(i=>i.ty==='recup').length};
+}
+function weekSheet(){
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Choisir une semaine"><button class="x" data-act="close" aria-label="Fermer">✕</button><h2>Aller à la semaine</h2><div class="wlist">';
+  for(let k=0;k<NB_SEM;k++){const mon=lundi(k),fr=parse(mon),to=parse(addDays(mon,4)),m=statsSemaine(mon);
+    h+='<button data-act="week" data-v="'+k+'"'+(k===UI.week?' aria-current="true"':'')+'><span><b>'+NOMS_SEM[k]+'</b><small>du '+fr.getDate()+' '+MON[fr.getMonth()]+' au '+to.getDate()+' '+MON[to.getMonth()]+'</small></span><span class="wc">'+(m.ev?'⭐ '+m.ev+' ':'')+(m.rem?'📤 '+m.rem:'')+(!m.ev&&!m.rem?'<span class="muted" style="font-weight:400">rien</span>':'')+'</span></button>';}
+  return h+'</div></div></div>';
+}
+function openWeekPicker(){if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet='__w';$('#sheet-root').innerHTML=weekSheet();}
+
+/* ===== Gros projets ===== */
+function renderGros(){
+  // Fenêtre de 6 semaines, limitée à la période couverte par les données
+  const mon0=lundi(0),fin6=addDays(mon0,7*NB_SEM-1);
+  const list=all().filter(i=>BIG[i.ty]&&i.d>=TODAY&&i.d<=fin6).sort(byDate);
+  let h='';
+  if(list.length){
+    const derniere=list[list.length-1].d, couvert=AG_FIN>derniere?AG_FIN:derniere;
+    const end=couvert<fin6?couvert:fin6;
+    const span=Math.max(diffDays(end,TODAY),1),per={};
+    let r='<div class="rwrap"><div class="ruler'+(UI.anim==='gros'?' go':'')+'"><div class="line"></div><span class="now"></span><span class="tl" style="left:0;transform:none">Auj.</span>';
+    for(let d=addDays(TODAY,1);d<=end;d=addDays(d,1)){
+      if(parse(d).getDay()===1){const x=diffDays(d,TODAY)/span*100;r+='<span class="tk" style="left:'+x+'%"></span><span class="tl" style="left:'+x+'%">'+parse(d).getDate()+' '+MON[parse(d).getMonth()]+'</span>';}
+    }
+    list.forEach((i,ix)=>{const k=per[i.d]=(per[i.d]||0)+1,w=Math.floor(diffDays(i.d,mon0)/7);
+      r+='<button class="dot" data-act="dot" data-id="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(fmt(i.d))+'" style="left:'+(diffDays(i.d,TODAY)/span*100)+'%;bottom:'+(38+(k-1)*18)+'px;--dy:'+(14+(k-1)*18)+'px;--k:'+ix+';'+cv(co(i))+'"></button>';});
+    h+=r+'</div></div>';
+  }
+  let cur=-1;
+  list.forEach(i=>{
+    const w=Math.floor(diffDays(i.d,mon0)/7);
+    if(w!==cur){cur=w;const ws=addDays(mon0,7*w),we=addDays(ws,4);
+      h+='<h3 class="wk" data-w="'+w+'">'+NOMS_SEM[w]+' <span class="muted">(du '+parse(ws).getDate()+' au '+parse(we).getDate()+' '+MON[parse(we).getMonth()]+')</span></h3>';}
+    const c=co(i),st=S.steps[i.id]||[],n=(i.steps||[]).length,dn=st.filter(Boolean).length,dd=diffDays(i.d,TODAY);
+    const cd=dd===0?'<b>Auj.</b>':'<b>'+dd+'</b><small>'+(dd===1?'jour':'jours')+'</small>';
+    h+='<button class="proj'+(isDone(i.id)?' done':'')+'" style="'+cv(c)+'" data-act="open" data-id="'+i.id+'" data-card="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(when(i.d))+'">'+
+      '<span class="cd'+(dd<=2?' soon':'')+'">'+cd+'</span>'+
+      '<span class="pc"><span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i,'eval')+'</span><h3>'+esc(i.t)+'</h3><span class="muted">'+esc(cap(fmt(i.d)))+(i.time?', '+esc(i.time):'')+'</span>'+
+      (n?'<div class="bar"><i style="width:'+Math.round(dn/n*100)+'%"></i></div><span class="muted" style="font-size:.85rem">'+dn+'/'+n+' consignes du prof</span>':'')+
+      (isDone(i.id)?'<span style="display:block;margin-top:6px">✓ Fait</span>':'')+'</span>'+
+      '<span class="arr" aria-hidden="true">›</span></button>';
+  });
+  if(!list.length)h+='<div class="empty">Aucune évaluation dans les 6 prochaines semaines.</div>';
+  $('#view').innerHTML=h;
+}
+/* Toucher un point : aller à la carte de l'évaluation et l'ouvrir */
+function allerEval(id){
+  const c=document.querySelector('[data-card="'+id+'"]');if(!c){openSheet(id);return;}
+  const r=document.querySelector('.rwrap'),off=(r?r.getBoundingClientRect().height:0)+12;
+  const y=window.scrollY+c.getBoundingClientRect().top-off;
+  const rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({top:y,behavior:rm?'auto':'smooth'});
+  c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),900);
+  setTimeout(()=>openSheet(id),rm?0:380);
+}
+
+/* ===== Notes ===== */
+/* Plages : 85 et plus super, 75 et plus ça va, 65 et plus bof, moins de 65 alerte */
+function plage(p){return p>=85?{k:'n4',m:'Super'}:p>=75?{k:'n3',m:'Ça va'}:p>=65?{k:'n2',m:'Bof'}:{k:'n1',m:'Alerte'};}
+const SMI={n4:['😄','Très bien'],n3:['🙂','Bien'],n2:['😐','Moyen'],n1:['💪','À travailler']};
+const xv=p=>'--x:var(--'+plage(p).k+')';
+/* Ressenti d'une matière : la note provisoire de Coba si elle existe, sinon la moyenne des 3 dernières notes */
+function ressenti(code){
+  const pv=(COLLECTE.provisoires||{})[code]||[],tout=GRADES.filter(x=>x.c===code).sort((a,b)=>a.d<b.d?-1:1);
+  const g=tout.filter(x=>x.p!=null);   // les cotes en lettres ne comptent ni dans la courbe ni dans le smiley
+  if(!pv.length&&!tout.length)return null;
+  const c=pv.find(x=>x.ponderation===100)||pv[0];
+  const base=c?c.note:g.length?Math.round(g.slice(-3).reduce((a,x)=>a+x.p,0)/Math.min(3,g.length)):null;
+  return {p:base,pv:c||null,g,tout};
+}
+function spark(v,color){
+  if(v.length<2)return '';
+  const h=34,min=Math.min.apply(null,v)-5,max=Math.max.apply(null,v)+5;
+  const pts=v.map((x,k)=>(k/(v.length-1)*92+4).toFixed(1)+','+(h-4-(x-min)/(max-min)*(h-8)).toFixed(1));
+  const l=pts[pts.length-1].split(',');
+  // la ligne s'étire avec la carte ; le point final est un rond HTML posé dessus, donc jamais déformé
+  return '<div class="spk"><svg viewBox="0 0 100 '+h+'" preserveAspectRatio="none" aria-hidden="true"><polyline class="ln" points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><span class="pt" style="left:'+l[0]+'%;top:'+(l[1]/h*100).toFixed(1)+'%;background:'+color+'"></span></div>';
+}
+function renderNotes(){
+  let h='<section class="sec'+(UI.anim==='notes'?' go':'')+'"><h2>Mes notes</h2>';
+  Object.keys(COURSES).forEach(code=>{
+    const n=ressenti(code);if(!n)return;
+    const c=COURSES[code],g=n.g,der=n.tout[n.tout.length-1],s=n.p!=null?SMI[plage(n.p).k]:null;
+    // tendance entre les deux dernières notes chiffrées, seulement si la toute dernière est chiffrée
+    let tr='';if(der&&der.p!=null&&g.length>1){const dl=g[g.length-1].p-g[g.length-2].p;tr=' <span class="'+(dl>0?'up':dl<0?'down':'')+'">'+(dl>0?'↑ +'+dl:dl<0?'↓ '+dl:'→')+'</span>';}
+    const sous=der?'Dernière <b>'+(der.p!=null?der.p+' %':esc(der.cote))+'</b>'+tr:'Provisoire <b>'+n.pv.note+' %</b>';
+    h+='<button class="grade cbtn" data-act="course" data-c="'+code+'" style="'+cv(c)+'" aria-label="'+esc(c.n)+(s?' : '+s[1]:'')+'"><span class="nm"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="ln2">'+sous+'</span></span><div>'+spark(g.map(x=>x.p),c.c)+'</div><span class="smi" aria-hidden="true">'+(s?s[0]:'')+'</span></button>';
+  });
+  h+='<p class="src">😄 85 % et plus · 🙂 75 % · 😐 65 % · 💪 moins de 65 %. Selon la note provisoire de Coba, sinon les 3 dernières notes.</p>';
+  h+='</section>';
+  const pp=SUIVI.pos+SUIVI.tips?Math.round(SUIVI.pos/(SUIVI.pos+SUIVI.tips)*100):100;
+  h+='<section class="sec'+(UI.anim==='notes'?' go':'')+'"><h2>Ce que disent mes profs</h2><div class="card">'
+    +'<div class="stk" style="display:flex;height:18px;border:3px solid var(--line);border-radius:99px;overflow:hidden;margin:2px 0 6px"><i style="width:'+pp+'%;background:var(--ok)"></i><i style="width:'+(100-pp)+'%;background:var(--hl)"></i></div>'
+    +'<button class="srow" data-act="suivi" data-v="pos"><span><b>'+SUIVI.pos+' commentaires positifs</b></span><span aria-hidden="true">›</span></button>'
+    +'<button class="srow" data-act="suivi" data-v="rem"><span><b>'+SUIVI.tips+' remarques</b></span><span aria-hidden="true">›</span></button></div></section>';
+  const grp={};NOGRADE.forEach(x=>{(grp[x[0]]=grp[x[0]]||[]).push(x);});
+  const ng=Object.keys(grp).sort((a,b)=>grp[b].length-grp[a].length).map(code=>{const c=COURSES[code],g=grp[code];return '<div class="ng" style="'+cv(c)+'"><div class="ngh"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="muted">'+g.length+' '+(g.length>1?'travaux':'travail')+'</span></div>'+g.slice().sort((a,b)=>a[2]<b[2]?-1:1).map(x=>'<div class="ngr"><span>'+esc(x[1])+'</span><span class="chip'+(diffDays(TODAY,x[2])>14?' old':'')+'">'+esc(fmt(x[2]))+'</span></div>').join('')+'</div>';}).join('');
+  if(Object.keys(PROFS).length)h+='<section class="sec"><h2>Mes profs</h2>'+Object.keys(PROFS).map(code=>{const c=COURSES[code];return '<button class="prow2 cbtn" data-act="course" data-c="'+code+'" style="'+cv(c)+'"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="pn">'+esc(PROFS[code].p)+'</span></button>';}).join('')+'<p class="src">Touche une matière pour voir son prof, ses récups et ses prochaines évaluations.</p></section>';
+  h+=fold('nograde','Travaux sans note dans Coba ('+NOGRADE.length+')','<p class="muted" style="margin-top:0">Date de remise passée et aucune note affichée dans Coba. En orange : date de remise dépassée depuis plus de 2 semaines.</p>'+ng);
+  $('#view').innerHTML=h;
+}
+
+/* ===== Ajout manuel ===== */
+function autoTitle(ty,code){
+  const base={devoir:'Devoir',exam:'Examen',projet:'Projet',recup:'Récup'}[ty]||'Rappel';
+  if(code==='EVT')return base;
+  const n=code==='ATE'?COURSES[code].n:COURSES[code].n.toLowerCase();
+  return base+(/^[aeiouyéèêh]/i.test(n)?' d’':' de ')+n;
+}
+function addBtn(d,ty,label){return '<button class="add" data-act="add" data-d="'+(d||'')+'" data-ty="'+ty+'">+ '+esc(label||'Ajouter')+'</button>';}
+function formSheet(it,pre){
+  const e=it||{d:pre.d||NEXT,ty:pre.ty||'devoir',c:'MAT'};
+  const opt=(arr,val)=>arr.map(o=>'<option value="'+o[0]+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>').join('');
+  const cs=Object.keys(COURSES).filter(k=>k!=='SPO').map(k=>[k,COURSES[k].e+' '+(k==='EVT'?'Autre / école':COURSES[k].n)]);
+  return '<div class="scrim full" data-act="scrim"><div class="sheet full" role="dialog" aria-modal="true" aria-label="'+(it?'Modifier':'Ajouter')+'"><div class="fhead"><h2>'+(it?'Modifier':'Ajouter')+'</h2><button class="x" data-act="close" aria-label="Fermer">✕</button></div><p class="manual">✍️ Ajout manuel. Il se place tout seul au bon endroit selon son type, avec l’étiquette « Ajouté ». Visible seulement sur cet appareil.</p><div class="form">'+
+    '<label>Type<select id="f-ty">'+opt(TYPES,e.ty)+'</select></label>'+
+    '<label>Matière<select id="f-c">'+opt(cs,e.c)+'</select></label>'+
+    '<label><span>Quoi ? <span class="muted" style="font-weight:400">(optionnel, sauf pour « À apporter »)</span></span><input id="f-t" type="text" value="'+esc(e.t||'')+'" placeholder="Ex. Réviser le chapitre 2"></label>'+
+    '<div class="row2"><label>Date<input id="f-d" type="date" value="'+esc(e.d)+'"></label><label>Heure<input id="f-h" type="text" value="'+esc(e.time||'')+'" placeholder="Ex. 9h30"></label></div><p class="manual" style="margin-top:-4px">Heure optionnelle. Une récup sans heure va au dîner.</p>'+
+    '<label>Note<textarea id="f-n" placeholder="Optionnel">'+esc(e.note||'')+'</textarea></label>'+
+    '<button class="btn" data-act="fsave" data-id="'+(it?it.id:'')+'">Enregistrer</button></div></div></div>';
+}
+function openForm(it,pre){
+  if(!UI.sheet)UI.last=document.activeElement;
+  lock();
+  UI.sheet='__form';$('#sheet-root').innerHTML=formSheet(it,pre||{});
+  const f=$('#sheet-root').querySelector?$('#sheet-root').querySelector('.x'):null;if(f&&f.focus)f.focus();
+}
+
+/* ===== Fiche matière ===== */
+function nextClasses(code,n){
+  const out=[];let d=TODAY;
+  for(let k=0;k<60&&out.length<n&&d<=AG_FIN;k++){
+    periodes(d).forEach(x=>{if(x.code===code&&(d>TODAY||toMin(x.s)>NOWMIN)&&out.length<n)out.push({d:d,t:hh(x.s)});});
+    d=addDays(d,1);
+  }
+  return out;
+}
+function courseSheet(code){
+  const c=COURSES[code],pr=PROFS[code]||{},nx=nextClasses(code,2);
+  const ev=all().filter(i=>i.c===code&&BIG[i.ty]&&i.d>=TODAY&&!isDone(i.id)).sort(byDate);
+  const g=GRADES.filter(x=>x.c===code).sort((a,b)=>a.d<b.d?-1:1),last=g[g.length-1];   // chiffrées et cotes
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(c.n)+'" style="'+cv(c)+'"><button class="x" data-act="close" aria-label="Fermer">✕</button>';
+  h+='<span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span></span><h2>'+esc(pr.p||c.n)+'</h2>';
+  if(code===TITULAIRE_C)h+='<p class="muted" style="margin-top:-4px">Aussi ton titulaire.</p>';
+  h+='<div class="cs"><p><b>📍 Local</b><br>'+esc(pr.loc||'À confirmer')+'</p>';
+  h+='<p><b>🗓️ Prochains cours</b><br>'+(nx.length?nx.map(x=>esc(cap(fmt(x.d)))+' à '+x.t).join('<br>'):'Horaire pas encore disponible.')+'</p>';
+  h+='<p><b>🛟 Récups</b><br>'+esc(pr.rec||'Pas d’horaire de récup connu. Demande-le en classe ou par les courriels de Coba.')+'</p>';
+  h+='<p><b>✉️ Joindre</b><br>Par les courriels de Coba.</p>';
+  h+='<p><b>⭐ Prochaines évaluations</b></p>'+(ev.length?ev.map(i=>tile(i,{date:true,mode:'eval'})).join(''):'<p class="muted" style="margin-top:-4px">Aucune pour l’instant.</p>');
+  {const pv=(COLLECTE.provisoires||{})[code]||[];
+   if(pv.length)h+='<p><b>🎯 Note provisoire (Coba)</b></p>'+pv.map(x=>'<div class="gl" style="'+xv(x.note)+'"><span>'+esc(x.nom)+'<br><span class="muted" style="font-size:.85rem">'+x.ponderation+' % de la matière</span></span><b>'+x.note+' %</b></div>').join('');}
+  if(last)h+='<p><b>📈 Dernières notes</b></p>'+g.slice(-5).reverse().map(x=>'<div class="gl"'+(x.p!=null?' style="'+xv(x.p)+'"':'')+'><span>'+esc(x.l)+'<br><span class="muted" style="font-size:.85rem">'+esc(cap(fmt(x.d)))+'</span></span><b>'+(x.p!=null?x.p+' %':esc(x.cote))+'</b></div>').join('');
+  h+='</div><p class="src" style="margin-top:16px">Source : 🏫 Coba'+(pr.src==='C'?' et 🎓 Classroom':'')+'</p></div></div>';
+  return h;
+}
+function suiviSheet(kind){
+  const pos=kind==='pos',E=(SUIVI.entrees||[]).filter(e=>pos?/positif/i.test(e.type):!/positif/i.test(e.type)).sort((a,b)=>a.d<b.d?1:-1);
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+(pos?'Commentaires positifs':'Remarques')+'"><button class="x" data-act="close" aria-label="Fermer">✕</button><h2>'+(pos?SUIVI.pos+' commentaires positifs':SUIVI.tips+' remarques')+'</h2>';
+  if(pos){const g={};E.forEach(e=>{g[e.comm]=(g[e.comm]||0)+1;});
+    h+='<p class="muted" style="margin-top:-4px">'+Object.keys(g).sort((a,b)=>g[b]-g[a]).map(k=>'« '+esc(k)+' » '+g[k]+(g[k]>1?' fois':' fois')).join(' · ')+'</p>';}
+  const mots=s=>new Set((s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>1&&w!=='a'));
+  const sansRepete=(det,comm)=>{const ph=det.split(/(?<=[.!?])\s+/),c=mots(comm);
+    if(ph.length&&[...mots(ph[0])].filter(w=>!c.has(w)).length<=1)ph.shift();return ph.join(' ').trim();};
+  h+=E.map(e=>{const det=(e.detail||'').trim(),extra=det&&det!==e.comm?sansRepete(det,e.comm):'';
+    // « Comportement attendu : … Observation : … » sur deux lignes ; une observation vide est retirée
+    const blocs=extra.replace(/\s*Observation\s*:\s*$/i,'').split(/\s*(?=Observation\s*:)/i).map(x=>x.trim()).filter(Boolean);
+    const fmtB=x=>{const m=x.match(/^(Comportement attendu|Observation)\s*:\s*(.*)$/is);return m?'<b>'+esc(m[1])+' :</b> '+esc(m[2]):esc(x);};
+    return '<div class="sent"><div>'+esc(e.comm)+'</div>'+blocs.map(x=>'<div style="margin-top:4px">'+fmtB(x)+'</div>').join('')+'<div class="m">'+(e.d?esc(cap(fmt(e.d)))+' · ':'')+esc(e.prof||'')+(pos?'':' · '+esc(e.type))+'</div></div>';}).join('')||'<p class="muted">Aucun.</p>';
+  return h+'<p class="src" style="margin-top:14px">Source : 🏫 Coba, section Suivi.</p></div></div>';
+}
+function openSuivi(kind){if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet='__s:'+kind;$('#sheet-root').innerHTML=suiviSheet(kind);}
+function openCourse(code){
+  if(!COURSES[code])return;
+  if(!UI.sheet)UI.last=document.activeElement;
+  lock();UI.sheet='__c:'+code;$('#sheet-root').innerHTML=courseSheet(code);
+  const x=$('#sheet-root').querySelector?$('#sheet-root').querySelector('.x'):null;if(x&&x.focus)x.focus();
+}
+
+/* ===== Fiche ===== */
+function sheet(i){
+  const c=co(i),st=S.steps[i.id]||[];
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(i.t)+'" style="'+cv(c)+'"><button class="x" data-act="close" aria-label="Fermer">✕</button>';
+  h+='<span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i)+'</span><h2>'+esc(i.t)+'</h2>';
+  if(i.ty!=='consigne')h+='<p><b>'+esc(cap(fmt(i.d)))+'</b>'+(i.time?', '+esc(i.time):'')+' <span class="muted">('+esc(when(i.d))+')</span></p>';
+  if(i.fromAgenda)h+='<p class="muted">Annoncé dans l’agenda de Coba, pas encore dans la liste des travaux.</p>';
+  if(i.note)h+='<p>'+esc(i.note)+'</p>';
+  if(i.steps)h+='<h3>Consignes du prof</h3>'+i.steps.map((s,k)=>'<label class="step'+(UI.pop==='s:'+i.id+':'+k?' pop':'')+'"><input type="checkbox" data-act="step" data-id="'+i.id+'" data-i="'+k+'"'+(st[k]?' checked':'')+'><span>'+esc(String(s).replace(/^[-–•*]\s+/,''))+'</span></label>').join('');
+  if(i.bring)h+='<h3>À apporter à l’école</h3><p>'+esc(i.bring.join(', '))+'</p>';
+  if(WORK[i.ty])h+='<button class="btn'+(isDone(i.id)?' plain':'')+'" data-act="toggle" data-id="'+i.id+'">'+(isDone(i.id)?'Pas encore fait':'C’est fait ✓')+'</button>';
+  if(i.src==='M')h+='<div class="row2"><button class="btn plain" data-act="edit" data-id="'+i.id+'">✏️ Modifier</button><button class="btn danger" data-act="del" data-id="'+i.id+'">'+(UI.delArm===i.id?'Confirmer ?':'🗑️ Supprimer')+'</button></div>';
+  h+='<p class="src" style="margin-top:16px">Source : '+esc(srcText(i.src))+'</p>';
+  return h+'</div></div>';
+}
+function openSheet(id){const i=find(id);if(!i)return;if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet=id;const r=$('#sheet-root');const old=r.querySelector?r.querySelector('.sheet'):null,top=old?old.scrollTop:0;r.innerHTML=sheet(i);const s=r.querySelector?r.querySelector('.sheet'):null;if(s)s.scrollTop=top;const x=r.querySelector?r.querySelector('.x'):null;if(x&&!old)x.focus();}
+let toastT=null;
+function toast(m){const t=$('#toast');if(!t)return;t.textContent=m;if(t.classList)t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>{if(t.classList)t.classList.remove('on');},2600);}
+let lockY=0;
+function lock(){const b=document.body;if(!b||b.classList.contains('lock'))return;lockY=window.scrollY||0;b.style.top=(-lockY)+'px';b.classList.add('lock');}
+function unlock(){const b=document.body;if(!b||!b.classList.contains('lock'))return;b.classList.remove('lock');b.style.top='';window.scrollTo(0,lockY);}
+function closeSheet(){unlock();UI.sheet=null;UI.delArm=null;{const r=$('#sheet-root'),sc=r.querySelector?r.querySelector('.scrim'):null,rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(sc&&sc.classList&&!rm){sc.classList.add('closing');setTimeout(()=>{if(!UI.sheet)r.innerHTML='';},180);}else r.innerHTML='';}if(UI.last&&UI.last.focus)try{UI.last.focus();}catch(e){}}
+
+function accueilVide(){
+  $('#view').innerHTML='<section class="sec"><h2>Bienvenue dans Mon Cap</h2><div class="card"><p style="margin-top:0">Aucune donnée sur ce téléphone pour l’instant.</p>'
+   +'<p>Importe le fichier de collecte téléchargé par l’extension.</p>'
+   +'<p><button class="btn" data-act="importer">Importer un fichier</button></p>'
+   +'</div></section>';
+}
+function render(){
+  if(!A_DONNEES){accueilVide();$('#tabs').hidden=true;return;}
+  renderTop();renderTabs();
+  ({jour:renderJour,semaine:renderSemaine,gros:renderGros,notes:renderNotes})[UI.tab]();
+  if(UI.anim==='notes')countUp();
+  UI.anim=null;
+}
+function countUp(){
+  if(typeof document.querySelectorAll!=='function'||typeof requestAnimationFrame!=='function')return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const els=document.querySelectorAll('.go .big[data-n]'),t0=performance.now();
+  els.forEach(el=>{el.textContent='0 %';});
+  const step=t=>{const p=Math.min(1,Math.max(0,(t-t0-150)/800)),e=1-Math.pow(1-p,3);els.forEach(el=>{el.textContent=Math.round(e*Number(el.dataset.n))+' %';});if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
+function refresh(){const y=window.scrollY||0;render();if(UI.sheet&&UI.sheet!=='__form')openSheet(UI.sheet);try{if(!document.body||!document.body.classList.contains('lock'))window.scrollTo(0,y);}catch(e){}}
+
+document.addEventListener('click',function(e){
+  const t=e.target.closest?e.target.closest('[data-act]'):null;if(!t)return;
+  const a=t.dataset.act,v=t.dataset;
+  if(a==='scrim'){if(e.target===t)closeSheet();return;}
+  if(a==='tab'){UI.tab=v.v;UI.anim=v.v;closeSheet();render();window.scrollTo(0,0);}
+  else if(a==='day'){UI.day=v.v;render();}
+  else if(a==='week'){UI.week=Math.max(0,Math.min(NB_SEM-1,Number(v.v)));if(UI.sheet==='__w')closeSheet();render();window.scrollTo(0,0);}
+  else if(a==='wpick')openWeekPicker();
+  else if(a==='importer')importer();
+  else if(a==='dot')allerEval(v.id);
+  else if(a==='suivi')openSuivi(v.v);
+  else if(a==='open')openSheet(v.id);
+  else if(a==='close')closeSheet();
+  else if(a==='toggle'){if(S.done[v.id])delete S.done[v.id];else{S.done[v.id]=true;UI.pop='d:'+v.id;}save();refresh();UI.pop=null;}
+  else if(a==='course')openCourse(v.c);
+  else if(a==='add')openForm(null,{d:(UI.tab==='jour'&&UI.day==='today'&&isSchool(TODAY))?TODAY:NEXT,ty:'devoir'});
+  else if(a==='edit'){const it=find(v.id);if(it)openForm(it);}
+  else if(a==='fsave'){
+    const ty=$('#f-ty').value,cc=$('#f-c').value;let tt=($('#f-t').value||'').trim();
+    if(!tt){if(ty==='bring'){toast('Écris ce qu’il faut apporter');$('#f-t').focus();return;}tt=autoTitle(ty,cc);}
+    const it={id:v.id||('m'+Date.now()+Math.random().toString(36).slice(2,6)),d:$('#f-d').value||NEXT,c:$('#f-c').value,t:tt,ty:ty,src:'M',time:($('#f-h').value||'').trim(),note:($('#f-n').value||'').trim()};
+    if(ty==='bring')it.bring=[tt];
+    if(ty==='recup'&&!it.time)it.time='dîner';
+    const k=S.custom.findIndex(x=>x.id===it.id);if(k>=0)S.custom[k]=it;else S.custom.push(it);
+    save();closeSheet();render();
+    const where={devoir:'📤 À remettre',exam:'⭐ Évaluations',projet:'⭐ Évaluations',recup:'🛟 Horaire (dîner)',bring:'🎒 Sac'}[ty];
+    toast((v.id?'Modifié':'Ajouté')+' : '+where+', '+fmt(it.d));
+  }
+  else if(a==='del'){
+    if(UI.delArm!==v.id){UI.delArm=v.id;openSheet(v.id);}
+    else{S.custom=S.custom.filter(x=>x.id!==v.id);delete S.done[v.id];UI.delArm=null;save();closeSheet();render();toast('Supprimé');}
+  }
+  else if(a==='chk'){const m=S[v.kind]=S[v.kind]||{};const x=m[v.d]=m[v.d]||{};x[v.k]=t.checked;if(t.checked)UI.pop='c:'+v.kind+v.d+v.k;save();refresh();UI.pop=null;}
+  else if(a==='step'){const s=(S.steps[v.id]||[]).slice();s[Number(v.i)]=t.checked;S.steps[v.id]=s;if(t.checked)UI.pop='s:'+v.id+':'+v.i;save();refresh();UI.pop=null;}
+});
+document.addEventListener('toggle',function(e){const d=e.target;if(d&&d.dataset&&d.dataset.fold){S.open[d.dataset.fold]=d.open;if(d.open&&d.classList)d.classList.add('anim');save();}},true);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&UI.sheet)closeSheet();});
+render();
+})();
+</script>
+<input type="file" id="fic" accept="application/json,.json" hidden>
+<script>
+/* Hors connexion : le service worker garde l'app en cache. La mise à jour du code se fait au prochain lancement. */
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
