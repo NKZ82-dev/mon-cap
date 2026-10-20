@@ -688,6 +688,18 @@ return {
 
 const VIDE={type:'mon-cap-donnees',genere_le:null,agenda:{},conges:{},items:[],evenements:[],grades:[],provisoires:{},nograde:[],suivi:{pos:0,tips:0,entrees:[]},consignes:[],recups:[]};
 const lireJSON=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}};
+/* Relais (stockage partagé) : reçu par le lien d'installation …/#relais=<adresse>&cle=<clé téléphone>.
+   La partie après # n'est jamais envoyée à GitHub. Sur iPhone, l'app installée a son propre stockage :
+   le lien peut aussi être collé dans l'app. */
+function lireLienRelais(txt){try{const u=new URL(txt.trim());const q=new URLSearchParams(u.hash.slice(1));
+  const url=q.get('relais'),cle=q.get('cle');if(url&&cle&&/^https:\/\/script\.google\.com\//.test(url))return{url,cle};}catch(e){}return null;}
+{const r=lireLienRelais(location.href);if(r){localStorage.setItem('mon-cap-relais',JSON.stringify(r));history.replaceState(null,'',location.pathname);}}
+const RELAIS=lireJSON('mon-cap-relais');
+async function relais(action,params){
+  const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),25000);
+  try{const r=await fetch(RELAIS.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({cle:RELAIS.cle,action},params||{})),signal:ctrl.signal});return await r.json();}
+  finally{clearTimeout(t);}
+}
 const COLLECTE=Object.assign({},VIDE,lireJSON('mon-cap-donnees')||{});
 /* Le profil (profs, locaux, récups, activités) vient de la collecte ; un ancien profil importé sert de secours. */
 const PROFIL=COLLECTE.profil||lireJSON('mon-cap-profil')||{profs:{},activites:[],cycle:null};
@@ -763,7 +775,62 @@ const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();
 PRE_DONE.forEach(id=>{if(S.done[id]==null)S.done[id]=true;});
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+/* Partage des coches entre téléphones (etat.json) : chaque entrée porte l'heure de sa dernière modification ;
+   à la fusion, la plus récente l'emporte, entrée par entrée. « open » (sections dépliées) reste propre au téléphone. */
+const CHAMPS_PARTAGES=['done','steps','bag','home'];
+function instantane(){const o={};CHAMPS_PARTAGES.forEach(c=>{o[c]=JSON.parse(JSON.stringify(S[c]||{}));});o.custom={};(S.custom||[]).forEach(x=>{o.custom[x.id]=x;});return o;}
+let dernierInstantane=instantane();
+function horodater(){
+  const n=instantane(),t=S._t||(S._t={}),now=Date.now();
+  [...CHAMPS_PARTAGES,'custom'].forEach(c=>{const a=dernierInstantane[c]||{},b=n[c]||{};
+    new Set([...Object.keys(a),...Object.keys(b)]).forEach(k=>{if(JSON.stringify(a[k])!==JSON.stringify(b[k]))t[c+':'+k]=now;});});
+  dernierInstantane=n;
+}
+function fusionner(distant){
+  if(!distant||!distant.t)return false;
+  const loc=instantane(),t=S._t||(S._t={});let change=false;
+  for(const [k,td] of Object.entries(distant.t)){
+    if((t[k]||0)>=td)continue;
+    const i=k.indexOf(':'),c=k.slice(0,i),id=k.slice(i+1),val=(distant[c]||{})[id];
+    if(c==='custom'){S.custom=(S.custom||[]).filter(x=>x.id!==id);if(val)S.custom.push(val);}
+    else if(CHAMPS_PARTAGES.includes(c)){S[c]=S[c]||{};if(val===undefined)delete S[c][id];else S[c][id]=val;}
+    else continue;
+    t[k]=td;change=true;
+  }
+  if(change){dernierInstantane=instantane();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+  return change;
+}
+let envoiPrevu=null;
+async function envoyerEtat(){
+  if(!RELAIS)return;
+  for(let essai=0;essai<2;essai++){
+    try{
+      const l=await relais('lire',{fichier:'etat'});if(!l.ok)return;
+      fusionner(l.contenu);
+      const doc=instantane();doc.t=S._t||{};doc.v=1;
+      const w=await relais('ecrire',{fichier:'etat',contenu:doc,version_base:l.version});
+      if(w.ok||!w.conflit)return;   // conflit : un autre téléphone a écrit entre-temps, on refusionne
+    }catch(e){return;}
+  }
+}
+function save(){horodater();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  if(RELAIS){clearTimeout(envoiPrevu);envoiPrevu=setTimeout(envoyerEtat,1500);}}
+/* À l'ouverture et au retour dans l'app : nouvelles données et coches de l'autre téléphone */
+let ETAT_SYNC=RELAIS?'en cours':'local';
+async function synchroniser(){
+  if(!RELAIS)return;
+  try{
+    const [d,e]=await Promise.all([relais('lire',{fichier:'donnees'}),relais('lire',{fichier:'etat'})]);
+    if(!d.ok){ETAT_SYNC='erreur : '+(d.erreur||'?');render();return;}
+    let recharger=false;
+    if(d.contenu&&d.contenu.genere_le&&(!COLLECTE.genere_le||d.contenu.genere_le>COLLECTE.genere_le)){localStorage.setItem('mon-cap-donnees',JSON.stringify(d.contenu));recharger=true;}
+    const change=e.ok&&fusionner(e.contenu);
+    ETAT_SYNC='à jour';
+    if(recharger){location.reload();return;}
+    render();
+  }catch(x){ETAT_SYNC='hors connexion';render();}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')synchroniser();});
 const UI={tab:'jour',day:(isSchool(TODAY)&&NOWMIN<15*60)?'today':'next',week:0,sheet:null,last:null};
 
 /* ===== Calculs ===== */
@@ -876,7 +943,7 @@ function renderJour(){
   h+='<section class="sec"><h2 class="sh"><span>📤 À remettre '+(isT?'aujourd’hui':esc(when(d)))+'</span></h2>'+(due.length?due.map(i=>tile(i,{mode:'due'})).join(''):'<div class="empty">Rien à remettre.</div>')+'</section>';
   if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
   if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
-  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'. <button class="lien" data-act="importer">Mettre à jour</button></p>';
+  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Synchronisation : '+esc(ETAT_SYNC)+'.':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
   $('#view').innerHTML=h;
 }
 /* Importer : collecte de l'extension, données préparées ou profil. Rien ne quitte le téléphone. */
@@ -1136,10 +1203,13 @@ function unlock(){const b=document.body;if(!b||!b.classList.contains('lock'))ret
 function closeSheet(){unlock();UI.sheet=null;UI.delArm=null;{const r=$('#sheet-root'),sc=r.querySelector?r.querySelector('.scrim'):null,rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(sc&&sc.classList&&!rm){sc.classList.add('closing');setTimeout(()=>{if(!UI.sheet)r.innerHTML='';},180);}else r.innerHTML='';}if(UI.last&&UI.last.focus)try{UI.last.focus();}catch(e){}}
 
 function accueilVide(){
-  $('#view').innerHTML='<section class="sec"><h2>Bienvenue dans Mon Cap</h2><div class="card"><p style="margin-top:0">Aucune donnée sur ce téléphone pour l’instant.</p>'
-   +'<p>Importe le fichier de collecte téléchargé par l’extension.</p>'
-   +'<p><button class="btn" data-act="importer">Importer un fichier</button></p>'
-   +'</div></section>';
+  let h='<section class="sec"><h2>Bienvenue dans Mon Cap</h2>';
+  if(RELAIS)h+='<div class="card"><p style="margin:0">Récupération des données…</p><p class="muted" style="margin-bottom:0">'+esc(ETAT_SYNC)+'</p></div>';
+  else h+='<div class="card"><p style="margin-top:0"><b>Relier au stockage partagé</b></p><p class="muted">Colle ici le lien d’installation reçu (il commence par l’adresse de l’app et contient « #relais= »).</p>'
+    +'<textarea id="lien" rows="3" style="width:100%;font:inherit;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)"></textarea>'
+    +'<p><button class="btn" data-act="relier">Relier</button></p></div>'
+    +'<div class="card"><p style="margin-top:0">Ou importe un fichier de collecte téléchargé par l’extension.</p><p style="margin-bottom:0"><button class="btn" data-act="importer">Importer un fichier</button></p></div>';
+  $('#view').innerHTML=h+'</section>';
 }
 function render(){
   if(!A_DONNEES){accueilVide();$('#tabs').hidden=true;return;}
@@ -1167,6 +1237,7 @@ document.addEventListener('click',function(e){
   else if(a==='week'){UI.week=Math.max(0,Math.min(NB_SEM-1,Number(v.v)));if(UI.sheet==='__w')closeSheet();render();window.scrollTo(0,0);}
   else if(a==='wpick')openWeekPicker();
   else if(a==='importer')importer();
+  else if(a==='relier'){const r=lireLienRelais(($('#lien')||{}).value||'');if(!r){toast('Lien non reconnu');return;}localStorage.setItem('mon-cap-relais',JSON.stringify(r));location.reload();}
   else if(a==='dot')allerEval(v.id);
   else if(a==='suivi')openSuivi(v.v);
   else if(a==='open')openSheet(v.id);
@@ -1196,6 +1267,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('toggle',function(e){const d=e.target;if(d&&d.dataset&&d.dataset.fold){S.open[d.dataset.fold]=d.open;if(d.open&&d.classList)d.classList.add('anim');save();}},true);
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&UI.sheet)closeSheet();});
 render();
+synchroniser();   /* données et coches partagées, si le relais est configuré */
 })();
 </script>
 <input type="file" id="fic" accept="application/json,.json" hidden>

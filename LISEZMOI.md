@@ -15,16 +15,17 @@ sur chaque téléphone et y restent.
 - **Android (Chrome)** : ouvrir l'adresse, menu ⋮ → « Installer l'application ».
 - **iPhone (Safari obligatoirement)** : ouvrir l'adresse, bouton Partager → « Sur l'écran d'accueil ».
 
-## Charger les données (dans l'app installée)
-Sur iPhone, l'app installée a son propre stockage, distinct de Safari : l'import doit se faire
-**depuis l'app installée**, pas depuis Safari.
-1. Toucher « Importer un fichier » et choisir le **fichier de collecte** téléchargé par l'extension
-   (`collecte-AAAA-MM-JJ.json`). L'app le convertit elle-même ; les profs, locaux, récups et activités
-   en font partie.
-2. Pour mettre à jour : en bas de l'onglet Jour, « Mettre à jour », puis importer la nouvelle collecte.
+## Relier l'app au stockage partagé (une fois par téléphone)
+Le lien d'installation se crée dans les Réglages de l'extension (« Lien d'installation pour les téléphones »).
+Il contient la clé TÉLÉPHONE : ne l'envoyez qu'à vous-même et à votre enfant.
 
-Pour faire passer un fichier sur l'iPhone : AirDrop, l'app Fichiers ou iCloud Drive.
-Sur Android : Google Drive ou un câble USB.
+- **Android (Chrome)** : ouvrir le lien, puis ⋮ → « Installer l'application ». C'est tout.
+- **iPhone (Safari)** : ouvrir l'adresse de l'app (sans le lien), Partager → « Sur l'écran d'accueil ».
+  Ouvrir l'app depuis l'écran d'accueil, puis coller le lien dans « Relier au stockage partagé ».
+  (Sur iPhone, l'app installée a son propre stockage, séparé de Safari.)
+
+Ensuite, l'app récupère seule les nouvelles données à chaque ouverture, et partage les coches entre
+les téléphones. « Importer un fichier » reste possible en secours.
 
 ## Mettre à jour le code
 Remplacer `index.html` dans le dépôt. Changer aussi la ligne `const VERSION = 'mon-cap-1'` de

@@ -1,6 +1,6 @@
 /* Mon Cap — service worker : l'app fonctionne hors connexion.
    Aucune donnée personnelle n'est ici : les données restent dans le stockage du téléphone. */
-const VERSION = 'mon-cap-6';
+const VERSION = 'mon-cap-7';
 const COQUILLE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
