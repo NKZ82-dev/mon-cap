@@ -831,10 +831,14 @@ async function synchroniser(){
   try{
     const [d,e]=await Promise.all([relais('lire',{fichier:'donnees'}),relais('lire',{fichier:'etat'})]);
     if(!d.ok){ETAT_SYNC='erreur : '+(d.erreur||'?');render();return;}
-    let recharger=false;
-    if(d.contenu&&d.contenu.genere_le&&(!COLLECTE.genere_le||d.contenu.genere_le>COLLECTE.genere_le)){localStorage.setItem('mon-cap-donnees',JSON.stringify(d.contenu));recharger=true;}
+    let recharger=false,incompletes=false;
+    if(d.contenu&&d.contenu.genere_le&&(!COLLECTE.genere_le||d.contenu.genere_le>COLLECTE.genere_le)){
+      // Données nettement plus pauvres que celles déjà là (collecte ratée) : on garde les nôtres
+      const n=(d.contenu.items||[]).length,a=Object.keys(d.contenu.agenda||{}).length,n0=(COLLECTE.items||[]).length,a0=Object.keys(COLLECTE.agenda||{}).length;
+      if(n0&&a0&&(n<n0*0.5||a<a0*0.5)){incompletes=true;}
+      else{localStorage.setItem('mon-cap-donnees',JSON.stringify(d.contenu));recharger=true;}}
     const change=e.ok&&fusionner(e.contenu);
-    ETAT_SYNC='à jour à '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+    ETAT_SYNC=incompletes?'données reçues incomplètes, les précédentes sont gardées':'à jour à '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
     if(recharger){location.reload();return;}
     render();
   }catch(x){ETAT_SYNC='hors connexion';render();}
