@@ -842,7 +842,10 @@ async function synchroniser(){
   if(!RELAIS)return;
   try{
     const [d,e]=await Promise.all([relais('lire',{fichier:'donnees'}),relais('lire',{fichier:'etat'})]);
-    if(!d.ok){ETAT_SYNC='erreur : '+(d.erreur||'?');render();return;}
+    if(!d.ok){
+      // clé changée ou révoquée (téléphone perdu, nouvelle clé) : oublier ce lien et demander le nouveau
+      if(d.erreur==='clé refusée'){localStorage.removeItem('mon-cap-relais');try{sessionStorage.setItem('mon-cap-lien-perime','1');}catch(e){}location.reload();return;}
+      ETAT_SYNC='erreur : '+(d.erreur||'?');render();return;}
     let recharger=false,incompletes=false;
     if(d.contenu&&d.contenu.genere_le&&(!COLLECTE.genere_le||d.contenu.genere_le>COLLECTE.genere_le)){
       // Données nettement plus pauvres que celles déjà là (collecte ratée) : on garde les nôtres
@@ -986,7 +989,7 @@ function renderJour(){
   if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
   if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
   h+='<p class="src">Thème : <button class="lien" data-act="theme">'+({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)')+'</button></p>';
-  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
+  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button> · <button class="lien" data-act="delier">Relier à un autre lien</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
   $('#view').innerHTML=h;
 }
 /* Importer : collecte de l'extension, données préparées ou profil. Rien ne quitte le téléphone. */
@@ -1268,7 +1271,8 @@ function accueilVide(){
   let h='<section class="sec"><h2>Bienvenue dans Mon Cap</h2>';
   if(RELAIS&&SUR_IOS&&!INSTALLEE&&ARRIVEE_PAR_LIEN){$('#view').innerHTML=guideIOS();return;}
   if(RELAIS)h+='<div class="card"><p style="margin:0">Récupération des données…</p><p class="muted" style="margin-bottom:0">'+esc(ETAT_SYNC)+'</p></div>';
-  else h+='<div class="card"><p style="margin-top:0"><b>Relier cet appareil</b></p><p class="muted">Copie le lien reçu (ou le code donné par l’assistant), puis touche le bouton.</p>'
+  else h+=(sessionStorage.getItem('mon-cap-lien-perime')?'<div class="card" style="border-color:var(--warn)"><p style="margin:0"><b>Le lien de cet appareil n’est plus valide.</b> Demande le nouveau lien à tes parents, copie-le, puis touche « Coller mon code ».</p></div>':'')
+    +'<div class="card"><p style="margin-top:0"><b>Relier cet appareil</b></p><p class="muted">Copie le lien reçu (ou le code donné par l’assistant), puis touche le bouton.</p>'
     +'<p><button class="btn" data-act="coller">Coller mon code</button></p>'
     +'<details><summary class="muted">Le bouton ne marche pas ?</summary><p class="muted">Colle le lien ici :</p>'
     +'<textarea id="lien" rows="3" style="width:100%;font:inherit;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)"></textarea>'
@@ -1290,6 +1294,9 @@ function render(){
   renderTop();renderTabs();
   ({jour:renderJour,semaine:renderSemaine,gros:renderGros,notes:renderNotes})[UI.tab]();
   // installation : guide iPhone (arrivé par le lien dans Safari) ou bouton Android
+  // lien périmé (clé changée) : les données restent visibles, et on demande le nouveau lien
+  if(!RELAIS&&UI.tab==='jour'&&sessionStorage.getItem('mon-cap-lien-perime'))
+    $('#view').insertAdjacentHTML('afterbegin','<section class="sec"><div class="card" style="border-color:var(--warn)"><p style="margin-top:0"><b>Le lien de cet appareil n’est plus valide.</b> Les données affichées ne se mettent plus à jour. Demande le nouveau lien à tes parents, copie-le, puis :</p><p style="margin:0"><button class="btn" data-act="coller">Coller mon code</button></p></div></section>');
   if(!INSTALLEE&&UI.tab==='jour'){
     let x='';
     if(SUR_IOS&&ARRIVEE_PAR_LIEN&&RELAIS)x=guideIOS();
@@ -1318,9 +1325,10 @@ document.addEventListener('click',function(e){
   else if(a==='week'){UI.week=Math.max(0,Math.min(NB_SEM-1,Number(v.v)));if(UI.sheet==='__w')closeSheet();render();window.scrollTo(0,0);}
   else if(a==='wpick')openWeekPicker();
   else if(a==='importer')importer();
+  else if(a==='delier'){if(confirm('Relier cet appareil à un autre lien ? Les données affichées seront remplacées par celles du nouveau lien. Les coches déjà partagées restent dans Drive.')){localStorage.removeItem('mon-cap-relais');localStorage.removeItem('mon-cap-donnees');location.reload();}}
   else if(a==='coller'){(async()=>{let t='';try{t=await navigator.clipboard.readText();}catch(e){}
     const r=lireLienRelais(t||'');if(!r){toast('Aucun code dans le presse-papiers');const d=document.querySelector('details');if(d)d.open=true;return;}
-    localStorage.setItem('mon-cap-relais',JSON.stringify(r));location.reload();})();}
+    localStorage.setItem('mon-cap-relais',JSON.stringify(r));try{sessionStorage.removeItem('mon-cap-lien-perime');}catch(e){}location.reload();})();}
   else if(a==='copiercode'){(async()=>{try{await navigator.clipboard.writeText(lienDeRelais(RELAIS));toast('Code copié');}catch(e){toast('Copie impossible');}})();}
   else if(a==='fermerguide'){ARRIVEE_PAR_LIEN=false;try{sessionStorage.removeItem('mon-cap-guide');}catch(e){}render();}
   else if(a==='installer'&&INVITE_INSTALL){INVITE_INSTALL.prompt();INVITE_INSTALL.userChoice.finally(()=>{INVITE_INSTALL=null;render();});}
