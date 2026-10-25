@@ -711,8 +711,17 @@ function lireLienRelais(txt){try{const u=new URL(txt.trim());const q=new URLSear
 const SUR_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const INSTALLEE=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
 function lienDeRelais(r){return location.origin+location.pathname+'#relais='+encodeURIComponent(r.url)+'&cle='+encodeURIComponent(r.cle);}
+/* Relier l'appareil à un relais. Un autre relais, c'est un autre foyer : les données, coches et ajouts
+   de l'ancien sont oubliés sur cet appareil (ils restent dans le Drive de l'ancien relais). */
+function enregistrerLien(r){
+  let ancien=null;try{ancien=JSON.parse(localStorage.getItem('mon-cap-relais')||'null');}catch(e){}
+  if(!ancien||ancien.url!==r.url||ancien.cle!==r.cle){
+    if(ancien&&ancien.url!==r.url){['mon-cap-donnees','mon-cap-v2'].forEach(k=>localStorage.removeItem(k));}
+  }
+  localStorage.setItem('mon-cap-relais',JSON.stringify(r));
+}
 let ARRIVEE_PAR_LIEN=false;try{ARRIVEE_PAR_LIEN=sessionStorage.getItem('mon-cap-guide')==='1';}catch(e){}
-{const r=lireLienRelais(location.href);if(r){localStorage.setItem('mon-cap-relais',JSON.stringify(r));history.replaceState(null,'',location.pathname);ARRIVEE_PAR_LIEN=true;try{sessionStorage.setItem('mon-cap-guide','1');}catch(e){}}}
+{const r=lireLienRelais(location.href);if(r){enregistrerLien(r);history.replaceState(null,'',location.pathname);ARRIVEE_PAR_LIEN=true;try{sessionStorage.setItem('mon-cap-guide','1');}catch(e){}}}
 /* Android : proposer l'installation dès que Chrome le permet */
 let INVITE_INSTALL=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();INVITE_INSTALL=e;if(typeof render==='function')render();});
 const RELAIS=lireJSON('mon-cap-relais');
@@ -1270,7 +1279,7 @@ function closeSheet(){unlock();UI.sheet=null;UI.delArm=null;{const r=$('#sheet-r
 function accueilVide(){
   let h='<section class="sec"><h2>Bienvenue dans Mon Cap</h2>';
   if(RELAIS&&SUR_IOS&&!INSTALLEE&&ARRIVEE_PAR_LIEN){$('#view').innerHTML=guideIOS();return;}
-  if(RELAIS)h+='<div class="card"><p style="margin:0">Récupération des données…</p><p class="muted" style="margin-bottom:0">'+esc(ETAT_SYNC)+'</p></div>';
+  if(RELAIS)h+='<div class="card"><p style="margin:0">'+(/^à jour/.test(ETAT_SYNC)?'Pas encore de données dans ce Google Drive : elles arrivent à la fin de la première collecte sur l’ordinateur. Tire l’écran vers le bas pour vérifier.':'Récupération des données…')+'</p><p class="muted" style="margin-bottom:0">'+esc(ETAT_SYNC)+'</p></div>';
   else h+=(sessionStorage.getItem('mon-cap-lien-perime')?'<div class="card" style="border-color:var(--warn)"><p style="margin:0"><b>Le lien de cet appareil n’est plus valide.</b> Demande le nouveau lien à tes parents, copie-le, puis touche « Coller mon code ».</p></div>':'')
     +'<div class="card"><p style="margin-top:0"><b>Relier cet appareil</b></p><p class="muted">Copie le lien reçu (ou le code donné par l’assistant), puis touche le bouton.</p>'
     +'<p><button class="btn" data-act="coller">Coller mon code</button></p>'
@@ -1325,10 +1334,10 @@ document.addEventListener('click',function(e){
   else if(a==='week'){UI.week=Math.max(0,Math.min(NB_SEM-1,Number(v.v)));if(UI.sheet==='__w')closeSheet();render();window.scrollTo(0,0);}
   else if(a==='wpick')openWeekPicker();
   else if(a==='importer')importer();
-  else if(a==='delier'){if(confirm('Relier cet appareil à un autre lien ? Les données affichées seront remplacées par celles du nouveau lien. Les coches déjà partagées restent dans Drive.')){localStorage.removeItem('mon-cap-relais');localStorage.removeItem('mon-cap-donnees');location.reload();}}
+  else if(a==='delier'){if(confirm('Relier cet appareil à un autre lien ? Les données, coches et ajouts affichés ici seront remplacés par ceux du nouveau lien. Rien n’est perdu : ils restent dans le Drive actuel.')){['mon-cap-relais','mon-cap-donnees','mon-cap-v2'].forEach(k=>localStorage.removeItem(k));location.reload();}}
   else if(a==='coller'){(async()=>{let t='';try{t=await navigator.clipboard.readText();}catch(e){}
     const r=lireLienRelais(t||'');if(!r){toast('Aucun code dans le presse-papiers');const d=document.querySelector('details');if(d)d.open=true;return;}
-    localStorage.setItem('mon-cap-relais',JSON.stringify(r));try{sessionStorage.removeItem('mon-cap-lien-perime');}catch(e){}location.reload();})();}
+    enregistrerLien(r);try{sessionStorage.removeItem('mon-cap-lien-perime');}catch(e){}location.reload();})();}
   else if(a==='copiercode'){(async()=>{try{await navigator.clipboard.writeText(lienDeRelais(RELAIS));toast('Code copié');}catch(e){toast('Copie impossible');}})();}
   else if(a==='fermerguide'){ARRIVEE_PAR_LIEN=false;try{sessionStorage.removeItem('mon-cap-guide');}catch(e){}render();}
   else if(a==='installer'&&INVITE_INSTALL){INVITE_INSTALL.prompt();INVITE_INSTALL.userChoice.finally(()=>{INVITE_INSTALL=null;render();});}
@@ -1339,7 +1348,7 @@ document.addEventListener('click',function(e){
     document.querySelectorAll('meta[name=theme-color]').forEach((m,k)=>{if(nx==='auto'){m.setAttribute('media',k===0?'(prefers-color-scheme: light)':'(prefers-color-scheme: dark)');m.content=k===0?'#F3F6FF':'#0D1130';}else{m.removeAttribute('media');m.content=sombre?'#0D1130':'#F3F6FF';}});
     render();}
   else if(a==='synchro'){ETAT_SYNC='en cours';render();synchroniser().then(()=>toast('À jour'));}
-  else if(a==='relier'){const r=lireLienRelais(($('#lien')||{}).value||'');if(!r){toast('Lien non reconnu');return;}localStorage.setItem('mon-cap-relais',JSON.stringify(r));location.reload();}
+  else if(a==='relier'){const r=lireLienRelais(($('#lien')||{}).value||'');if(!r){toast('Lien non reconnu');return;}enregistrerLien(r);location.reload();}
   else if(a==='dot')allerEval(v.id);
   else if(a==='suivi')openSuivi(v.v);
   else if(a==='open')openSheet(v.id);
