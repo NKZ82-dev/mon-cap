@@ -701,8 +701,20 @@ const lireJSON=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch
    La partie après # n'est jamais envoyée à GitHub. Sur iPhone, l'app installée a son propre stockage :
    le lien peut aussi être collé dans l'app. */
 function lireLienRelais(txt){try{const u=new URL(txt.trim());const q=new URLSearchParams(u.hash.slice(1));
+  // forme courte (QR code) : #c=<identifiant du script>.<h + clé en base64url | t + clé en clair>
+  const c=q.get('c');
+  if(c){const m=c.match(/^([\w-]+)\.([ht])(.+)$/);if(m){let cle=m[3];
+    if(m[2]==='h'){let s=cle.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';cle=[...atob(s)].map(x=>x.charCodeAt(0).toString(16).padStart(2,'0')).join('');}
+    else cle=decodeURIComponent(cle);
+    return{url:'https://script.google.com/macros/s/'+m[1]+'/exec',cle};}}
   const url=q.get('relais'),cle=q.get('cle');if(url&&cle&&/^https:\/\/script\.google\.com\//.test(url))return{url,cle};}catch(e){}return null;}
-{const r=lireLienRelais(location.href);if(r){localStorage.setItem('mon-cap-relais',JSON.stringify(r));history.replaceState(null,'',location.pathname);}}
+const SUR_IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const INSTALLEE=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+function lienDeRelais(r){return location.origin+location.pathname+'#relais='+encodeURIComponent(r.url)+'&cle='+encodeURIComponent(r.cle);}
+let ARRIVEE_PAR_LIEN=false;try{ARRIVEE_PAR_LIEN=sessionStorage.getItem('mon-cap-guide')==='1';}catch(e){}
+{const r=lireLienRelais(location.href);if(r){localStorage.setItem('mon-cap-relais',JSON.stringify(r));history.replaceState(null,'',location.pathname);ARRIVEE_PAR_LIEN=true;try{sessionStorage.setItem('mon-cap-guide','1');}catch(e){}}}
+/* Android : proposer l'installation dès que Chrome le permet */
+let INVITE_INSTALL=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();INVITE_INSTALL=e;if(typeof render==='function')render();});
 const RELAIS=lireJSON('mon-cap-relais');
 async function relais(action,params){
   const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),25000);
@@ -1254,17 +1266,36 @@ function closeSheet(){unlock();UI.sheet=null;UI.delArm=null;{const r=$('#sheet-r
 
 function accueilVide(){
   let h='<section class="sec"><h2>Bienvenue dans Mon Cap</h2>';
+  if(RELAIS&&SUR_IOS&&!INSTALLEE&&ARRIVEE_PAR_LIEN){$('#view').innerHTML=guideIOS();return;}
   if(RELAIS)h+='<div class="card"><p style="margin:0">Récupération des données…</p><p class="muted" style="margin-bottom:0">'+esc(ETAT_SYNC)+'</p></div>';
-  else h+='<div class="card"><p style="margin-top:0"><b>Relier au stockage partagé</b></p><p class="muted">Colle ici le lien d’installation reçu (il commence par l’adresse de l’app et contient « #relais= »).</p>'
+  else h+='<div class="card"><p style="margin-top:0"><b>Relier cet appareil</b></p><p class="muted">Copie le lien reçu (ou le code donné par l’assistant), puis touche le bouton.</p>'
+    +'<p><button class="btn" data-act="coller">Coller mon code</button></p>'
+    +'<details><summary class="muted">Le bouton ne marche pas ?</summary><p class="muted">Colle le lien ici :</p>'
     +'<textarea id="lien" rows="3" style="width:100%;font:inherit;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)"></textarea>'
-    +'<p><button class="btn" data-act="relier">Relier</button></p></div>'
+    +'<p><button class="btn" data-act="relier">Relier</button></p></details></div>'
     +'<div class="card"><p style="margin-top:0">Ou importe un fichier de collecte téléchargé par l’extension.</p><p style="margin-bottom:0"><button class="btn" data-act="importer">Importer un fichier</button></p></div>';
   $('#view').innerHTML=h+'</section>';
+}
+/* iPhone : arrivé par le lien dans Safari -> guide pour l'installer comme une app (stockage séparé de Safari) */
+function guideIOS(){
+  return '<section class="sec"><div class="card" style="border-color:var(--warn)"><h2 style="margin-bottom:8px">Installer Mon Cap sur cet iPhone</h2>'
+   +'<ol style="padding-left:20px;margin:0 0 12px">'
+   +'<li style="margin-bottom:8px">Touche <button class="btn" data-act="copiercode">Copier mon code</button></li>'
+   +'<li style="margin-bottom:8px">Touche <b>Partager</b> (le carré avec une flèche) puis <b>Sur l’écran d’accueil</b>.</li>'
+   +'<li>Ouvre <b>Mon Cap</b> depuis l’écran d’accueil et touche <b>Coller mon code</b>.</li></ol>'
+   +'<p style="margin:0"><button class="lien" data-act="fermerguide">Continuer dans Safari</button></p></div></section>';
 }
 function render(){
   if(!A_DONNEES){accueilVide();$('#tabs').hidden=true;return;}
   renderTop();renderTabs();
   ({jour:renderJour,semaine:renderSemaine,gros:renderGros,notes:renderNotes})[UI.tab]();
+  // installation : guide iPhone (arrivé par le lien dans Safari) ou bouton Android
+  if(!INSTALLEE&&UI.tab==='jour'){
+    let x='';
+    if(SUR_IOS&&ARRIVEE_PAR_LIEN&&RELAIS)x=guideIOS();
+    else if(INVITE_INSTALL)x='<section class="sec"><div class="card"><p style="margin-top:0">Ajoute Mon Cap à l’écran d’accueil pour l’ouvrir comme une app.</p><p style="margin:0"><button class="btn" data-act="installer">Installer l’app</button></p></div></section>';
+    if(x)$('#view').insertAdjacentHTML('afterbegin',x);
+  }
   if(UI.anim==='notes')countUp();
   UI.anim=null;
 }
@@ -1287,6 +1318,12 @@ document.addEventListener('click',function(e){
   else if(a==='week'){UI.week=Math.max(0,Math.min(NB_SEM-1,Number(v.v)));if(UI.sheet==='__w')closeSheet();render();window.scrollTo(0,0);}
   else if(a==='wpick')openWeekPicker();
   else if(a==='importer')importer();
+  else if(a==='coller'){(async()=>{let t='';try{t=await navigator.clipboard.readText();}catch(e){}
+    const r=lireLienRelais(t||'');if(!r){toast('Aucun code dans le presse-papiers');const d=document.querySelector('details');if(d)d.open=true;return;}
+    localStorage.setItem('mon-cap-relais',JSON.stringify(r));location.reload();})();}
+  else if(a==='copiercode'){(async()=>{try{await navigator.clipboard.writeText(lienDeRelais(RELAIS));toast('Code copié');}catch(e){toast('Copie impossible');}})();}
+  else if(a==='fermerguide'){ARRIVEE_PAR_LIEN=false;try{sessionStorage.removeItem('mon-cap-guide');}catch(e){}render();}
+  else if(a==='installer'&&INVITE_INSTALL){INVITE_INSTALL.prompt();INVITE_INSTALL.userChoice.finally(()=>{INVITE_INSTALL=null;render();});}
   else if(a==='theme'){const ordre=['auto','light','dark'],cur=localStorage.getItem('mon-cap-theme')||'auto',nx=ordre[(ordre.indexOf(cur)+1)%3];
     if(nx==='auto'){localStorage.removeItem('mon-cap-theme');document.documentElement.removeAttribute('data-theme');}
     else{localStorage.setItem('mon-cap-theme',nx);document.documentElement.setAttribute('data-theme',nx);}
