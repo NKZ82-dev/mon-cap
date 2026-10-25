@@ -1045,6 +1045,7 @@ function renderSemaine(){
     h+='</div></details>';
   }
   if(CONSIGNES.length)h+='<hr class="sep">'+fold('consignes','📋 Consignes des profs ('+CONSIGNES.length+')','<p class="muted" style="margin-top:0">Consignes en étapes publiées dans '+SRC.C+', sans date de remise dans Coba.</p>'+CONSIGNES.map(i=>tile(i)).join(''));
+  if((S.custom||[]).length)h+='<hr class="sep"><p><button class="btn plain" data-act="mesajouts">📝 Mes ajouts ('+S.custom.length+')</button></p>';
   h+='<p class="src">⭐ évaluation · 📤 travail à remettre · 🛟 récup'+(PROFIL.activites||[]).map(a=>' · '+(a.emoji||'🏅')+' '+esc(a.titre)).join('')+'</p>';
   $('#view').innerHTML=h;
 }
@@ -1169,7 +1170,7 @@ function formSheet(it,pre){
   const e=it||{d:pre.d||NEXT,ty:pre.ty||'devoir',c:'MAT'};
   const opt=(arr,val)=>arr.map(o=>'<option value="'+o[0]+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>').join('');
   const cs=Object.keys(COURSES).filter(k=>k!=='SPO').map(k=>[k,COURSES[k].e+' '+(k==='EVT'?'Autre / école':COURSES[k].n)]);
-  return '<div class="scrim full" data-act="scrim"><div class="sheet full" role="dialog" aria-modal="true" aria-label="'+(it?'Modifier':'Ajouter')+'"><div class="fhead"><h2>'+(it?'Modifier':'Ajouter')+'</h2><button class="x" data-act="close" aria-label="Fermer">✕</button></div><p class="manual">✍️ Ajout manuel. Il se place tout seul au bon endroit selon son type, avec l’étiquette « Ajouté ». Visible seulement sur cet appareil.</p><div class="form">'+
+  return '<div class="scrim full" data-act="scrim"><div class="sheet full" role="dialog" aria-modal="true" aria-label="'+(it?'Modifier':'Ajouter')+'"><div class="fhead"><h2>'+(it?'Modifier':'Ajouter')+'</h2><button class="x" data-act="close" aria-label="Fermer">✕</button></div><p class="manual">✍️ Ajout manuel. Il se place tout seul au bon endroit selon son type, avec l’étiquette « Ajouté ». '+(RELAIS?'Partagé avec les autres téléphones de la famille.':'Visible seulement sur cet appareil.')+'</p>'+((!it&&(S.custom||[]).length)?'<p style="margin:-4px 0 10px"><button class="lien" data-act="mesajouts">Voir tous mes ajouts ('+S.custom.length+')</button></p>':'')+'<div class="form">'+
     '<label>Type<select id="f-ty">'+opt(TYPES,e.ty)+'</select></label>'+
     '<label>Matière<select id="f-c">'+opt(cs,e.c)+'</select></label>'+
     '<label><span>Quoi ? <span class="muted" style="font-weight:400">(optionnel, sauf pour « À apporter »)</span></span><input id="f-t" type="text" value="'+esc(e.t||'')+'" placeholder="Ex. Réviser le chapitre 2"></label>'+
@@ -1177,6 +1178,21 @@ function formSheet(it,pre){
     '<label>Note<textarea id="f-n" placeholder="Optionnel">'+esc(e.note||'')+'</textarea></label>'+
     '<button class="btn" data-act="fsave" data-id="'+(it?it.id:'')+'">Enregistrer</button></div></div></div>';
 }
+/* ===== Mes ajouts : tous les ajouts faits à la main, sans limite de date ===== */
+function mesAjoutsSheet(){
+  const l=(S.custom||[]).slice(),av=l.filter(i=>(i.d||'')>=TODAY).sort(byDate),pa=l.filter(i=>(i.d||'')<TODAY).sort((a,b)=>byDate(b,a));
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Mes ajouts"><button class="x" data-act="close" aria-label="Fermer">✕</button>';
+  h+='<h2>📝 Mes ajouts</h2><p class="muted" style="margin-top:-4px">Tout ce que tu as ajouté à la main. Touche un ajout pour le modifier ou le supprimer.</p>';
+  h+=av.length?'<p><b>À venir ('+av.length+')</b></p>'+av.map(i=>tile(i,{date:true})).join(''):'<p class="muted">Rien à venir.</p>';
+  if(pa.length)h+='<details style="margin-top:14px"><summary><b>Passés ('+pa.length+')</b></summary>'+pa.map(i=>tile(i,{date:true})).join('')+'</details>';
+  h+='<p style="margin-top:16px"><button class="btn" data-act="add">+ Ajouter</button></p>';
+  return h+'</div></div>';
+}
+function openMesAjouts(){if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet='__ajouts';UI.retourAjouts=false;
+  if($('#sheet-root').querySelector('.sheet.full'))$('#sheet-root').innerHTML='';   // en revenant du formulaire plein écran
+  const nouvelle=afficherFiche(mesAjoutsSheet());const x=$('#sheet-root').querySelector('.x');if(x&&nouvelle)x.focus();}
+// une fiche ouverte depuis « Mes ajouts » y revient quand on la ferme
+function fermerFiche(){if((UI.retourAjouts||(UI.sheet==='__form'&&UI.formDepuisAjouts))&&UI.sheet!=='__ajouts'){UI.formDepuisAjouts=false;UI.retourAjouts=false;UI.sheet=null;openMesAjouts();return true;}closeSheet();return false;}
 function openForm(it,pre){
   if(!UI.sheet)UI.last=document.activeElement;
   lock();
@@ -1267,7 +1283,7 @@ function afficherFiche(html){
   }
   r.innerHTML=html;return true;   // nouvelle ouverture
 }
-function openSheet(id){const i=find(id);if(!i)return;if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet=id;
+function openSheet(id){const i=find(id);if(!i)return;if(!UI.sheet)UI.last=document.activeElement;lock();if(UI.sheet==='__ajouts')UI.retourAjouts=true;UI.sheet=id;
   const nouvelle=afficherFiche(sheet(i));const x=$('#sheet-root').querySelector('.x');if(x&&nouvelle)x.focus();}
 let toastT=null;
 function toast(m){const t=$('#toast');if(!t)return;t.textContent=m;if(t.classList)t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>{if(t.classList)t.classList.remove('on');},2600);}
@@ -1352,11 +1368,12 @@ document.addEventListener('click',function(e){
   else if(a==='dot')allerEval(v.id);
   else if(a==='suivi')openSuivi(v.v);
   else if(a==='open')openSheet(v.id);
-  else if(a==='close')closeSheet();
+  else if(a==='close')fermerFiche();
   else if(a==='toggle'){if(S.done[v.id])delete S.done[v.id];else{S.done[v.id]=true;UI.pop='d:'+v.id;}save();refresh();UI.pop=null;}
   else if(a==='course')openCourse(v.c);
-  else if(a==='add')openForm(null,{d:(UI.tab==='jour'&&UI.day==='today'&&isSchool(TODAY))?TODAY:NEXT,ty:'devoir'});
-  else if(a==='edit'){const it=find(v.id);if(it)openForm(it);}
+  else if(a==='add'){if(UI.sheet==='__ajouts')UI.formDepuisAjouts=true;openForm(null,{d:(UI.tab==='jour'&&UI.day==='today'&&isSchool(TODAY))?TODAY:NEXT,ty:'devoir'});}
+  else if(a==='edit'){const it=find(v.id);if(it){UI.formDepuisAjouts=!!UI.retourAjouts;openForm(it);}}
+  else if(a==='mesajouts')openMesAjouts();
   else if(a==='fsave'){
     const ty=$('#f-ty').value,cc=$('#f-c').value;let tt=($('#f-t').value||'').trim();
     if(!tt){if(ty==='bring'){toast('Écris ce qu’il faut apporter');$('#f-t').focus();return;}tt=autoTitle(ty,cc);}
@@ -1364,13 +1381,14 @@ document.addEventListener('click',function(e){
     if(ty==='bring')it.bring=[tt];
     if(ty==='recup'&&!it.time)it.time='dîner';
     const k=S.custom.findIndex(x=>x.id===it.id);if(k>=0)S.custom[k]=it;else S.custom.push(it);
-    save();closeSheet();render();
+    if(UI.sheet==='__form'&&UI.formDepuisAjouts){UI.retourAjouts=true;UI.formDepuisAjouts=false;}
+    save();fermerFiche();render();
     const where={devoir:'📤 À remettre',exam:'⭐ Évaluations',projet:'⭐ Évaluations',recup:'🛟 Horaire (dîner)',bring:'🎒 Sac'}[ty];
     toast((v.id?'Modifié':'Ajouté')+' : '+where+', '+fmt(it.d));
   }
   else if(a==='del'){
     if(UI.delArm!==v.id){UI.delArm=v.id;openSheet(v.id);}
-    else{S.custom=S.custom.filter(x=>x.id!==v.id);delete S.done[v.id];UI.delArm=null;save();closeSheet();render();toast('Supprimé');}
+    else{S.custom=S.custom.filter(x=>x.id!==v.id);delete S.done[v.id];UI.delArm=null;save();fermerFiche();render();toast('Supprimé');}
   }
   else if(a==='chk'){const m=S[v.kind]=S[v.kind]||{};const x=m[v.d]=m[v.d]||{};x[v.k]=t.checked;if(t.checked)UI.pop='c:'+v.kind+v.d+v.k;save();refresh();UI.pop=null;}
   else if(a==='step'){const s=(S.steps[v.id]||[]).slice();s[Number(v.i)]=t.checked;S.steps[v.id]=s;if(t.checked)UI.pop='s:'+v.id+':'+v.i;save();refresh();UI.pop=null;}
