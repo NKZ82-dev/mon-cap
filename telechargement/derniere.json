@@ -1,6 +1,6 @@
 {
-  "version": "0.15.2",
+  "version": "0.15.3",
   "date": "2026-10-26",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.2.zip",
-  "nouveautes": ["bouton « Vérifier les mises à jour », dans les Réglages et la fenêtre de l’icône"]
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.3.zip",
+  "nouveautes": ["les annonces Classroom sont rangées dans le cours de leur prof (plus de lecture d’anglais en Créatic)"]
 }
