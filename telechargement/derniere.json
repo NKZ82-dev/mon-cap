@@ -1,6 +1,6 @@
 {
-  "version": "0.15.1",
+  "version": "0.15.2",
   "date": "2026-10-26",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.1.zip",
-  "nouveautes": ["numéro de version affiché, et avertissement automatique des nouvelles versions"]
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.2.zip",
+  "nouveautes": ["bouton « Vérifier les mises à jour », dans les Réglages et la fenêtre de l’icône"]
 }
