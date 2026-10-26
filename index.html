@@ -801,6 +801,7 @@ function cycleDayCalc(s){
 const NEXT=nextSchool(TODAY);
 
 /* ===== État : seulement les cases cochées ===== */
+const VERSION_APP='19';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
 const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();
@@ -831,18 +832,26 @@ function fusionner(distant){
   return change;
 }
 let envoiPrevu=null;
+// Envoi des coches. En cas d'échec, l'app le DIT (pied de l'onglet Jour) et réessaie à la synchronisation suivante.
+let ENVOI_EN_ATTENTE=false;
 async function envoyerEtat(){
   if(!RELAIS)return;
-  for(let essai=0;essai<2;essai++){
+  ENVOI_EN_ATTENTE=true;
+  for(let essai=0;essai<3;essai++){
     try{
-      const l=await relais('lire',{fichier:'etat'});if(!l.ok)return;
+      const l=await relais('lire',{fichier:'etat'});
+      if(!l.ok)throw new Error(l.erreur||'lecture refusée');
       fusionner(l.contenu);
       const doc=instantane();doc.t=S._t||{};doc.v=1;
       const w=await relais('ecrire',{fichier:'etat',contenu:doc,version_base:l.version});
-      if(w.ok||!w.conflit)return;   // conflit : un autre téléphone a écrit entre-temps, on refusionne
-    }catch(e){return;}
+      if(w.ok){ENVOI_EN_ATTENTE=false;return;}
+      if(!w.conflit)throw new Error(w.erreur||'écriture refusée');
+      // conflit : un autre téléphone a écrit entre-temps, on refusionne et on réessaie
+    }catch(e){ETAT_SYNC='coches non envoyées ('+(e.message||e)+'), nouvel essai bientôt';if(typeof render==='function'&&!UI.sheet)render();return;}
   }
+  ETAT_SYNC='coches non envoyées, nouvel essai bientôt';if(!UI.sheet)render();
 }
+const RELAIS_COURT=RELAIS?('…'+((RELAIS.url.match(/\/s\/([\w-]+)\/exec/)||[])[1]||'').slice(-6)):'';
 function save(){horodater();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
   if(RELAIS){clearTimeout(envoiPrevu);envoiPrevu=setTimeout(envoyerEtat,1500);}}
 /* À l'ouverture et au retour dans l'app : nouvelles données et coches de l'autre téléphone */
@@ -862,6 +871,7 @@ async function synchroniser(){
       if(n0&&a0&&(n<n0*0.5||a<a0*0.5)){incompletes=true;}
       else{localStorage.setItem('mon-cap-donnees',JSON.stringify(d.contenu));recharger=true;}}
     const change=e.ok&&fusionner(e.contenu);
+    if(ENVOI_EN_ATTENTE)envoyerEtat();
     ETAT_SYNC=incompletes?'données reçues incomplètes, les précédentes sont gardées':'à jour à '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
     if(recharger){location.reload();return;}
     render();
@@ -997,8 +1007,8 @@ function renderJour(){
   h+='<section class="sec"><h2 class="sh"><span>📤 À remettre '+(isT?'aujourd’hui':esc(when(d)))+'</span></h2>'+(due.length?due.map(i=>tile(i,{mode:'due'})).join(''):'<div class="empty">Rien à remettre.</div>')+'</section>';
   if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
   if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
-  h+='<p class="src">Thème : <button class="lien" data-act="theme">'+({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)')+'</button></p>';
-  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button> · <button class="lien" data-act="delier">Relier à un autre lien</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
+  h+='<p class="src">Version '+VERSION_APP+' · Thème : <button class="lien" data-act="theme">'+({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)')+'</button></p>';
+  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Google Drive : relais '+esc(RELAIS_COURT)+'. Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button> · <button class="lien" data-act="delier">Relier à un autre lien</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
   $('#view').innerHTML=h;
 }
 /* Importer : collecte de l'extension, données préparées ou profil. Rien ne quitte le téléphone. */
