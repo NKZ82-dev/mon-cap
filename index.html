@@ -801,7 +801,7 @@ function cycleDayCalc(s){
 const NEXT=nextSchool(TODAY);
 
 /* ===== État : seulement les cases cochées ===== */
-const VERSION_APP='19';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
+const VERSION_APP='20';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
 const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();

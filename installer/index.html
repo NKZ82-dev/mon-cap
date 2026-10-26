@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installer Mon Cap</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+<header class="entete"><img src="../icons/icon-192.png" alt="" width="40" height="40"><span class="marque">Mon Cap</span>
+  <a class="avance" href="../confidentialite/">Confidentialité</a></header>
+<main class="page">
+  <h1>L’organisation scolaire de votre enfant, sur son téléphone</h1>
+  <p class="chapeau">Mon Cap rassemble chaque jour les travaux, l’horaire, les évaluations et les messages des profs, depuis Coba et Classroom, dans une app faite pour l’élève : quoi apporter, quoi remettre, quoi réviser.</p>
+
+  <h2>Comment ça marche</h2>
+  <div class="trois">
+    <div class="bloc"><span class="num">1</span><b>Votre ordinateur relève</b>Une extension Chrome lit le portail Coba et Classroom, avec vos identifiants, plusieurs fois par jour.</div>
+    <div class="bloc"><span class="num">2</span><b>Votre Google Drive garde</b>Les données sont rangées dans un dossier de votre Drive, et nulle part ailleurs.</div>
+    <div class="bloc"><span class="num">3</span><b>Le téléphone affiche</b>L’app de votre enfant se met à jour toute seule. Vous pouvez l’installer aussi.</div>
+  </div>
+  <div class="bloc calme" style="margin-top:16px"><b>Pas de serveur, pas de compte à créer.</b> Tout reste entre votre ordinateur, votre Google Drive et vos téléphones. <a href="../confidentialite/">En savoir plus</a></div>
+
+  <h2>Avant de commencer</h2>
+  <ul class="liste">
+    <li>Un ordinateur Windows ou Mac avec <b>Google Chrome</b>. Les collectes se font quand Chrome est ouvert.</li>
+    <li>Vos <b>identifiants du portail Coba</b> de l’école.</li>
+    <li>Le <b>compte Gmail qui reçoit les résumés Classroom</b> de votre enfant, en tant que tuteur.</li>
+    <li>Une quinzaine de minutes. Conçu pour le portail Coba du Collège de Montréal : une autre école sur Coba peut fonctionner, mais demandez d’abord à la personne qui vous a envoyé cette page.</li>
+  </ul>
+
+  <h2>Installer l’extension</h2>
+  <p>Elle n’est pas publiée sur le Chrome Web Store : on l’installe à la main, une seule fois, en six gestes.</p>
+  <div class="bloc"><ol class="gestes">
+    <li><b>Téléchargez l’extension.</b>
+      <div class="actions" style="margin-top:10px"><a class="btn telecharger" id="dl" href="../telechargement/mon-cap-collecte.zip">Télécharger Mon Cap<small id="dlInfo">dernière version</small></a></div></li>
+    <li><b>Décompressez-la dans un dossier où elle restera</b>, par exemple Documents.
+      <span class="voir">Windows : clic droit sur le fichier → <span class="menu">Extraire tout</span> → choisissez <span class="menu">Documents</span>. Mac : double-cliquez dessus, puis glissez le dossier dans Documents. <b>Ne déplacez plus et ne supprimez pas ce dossier : Chrome s’en sert.</b></span></li>
+    <li><b>Ouvrez la page des extensions de Chrome</b> : copiez cette adresse et collez-la dans la barre d’adresse.
+      <div style="margin-top:10px"><span class="code-chrome">chrome://extensions <button id="copier">Copier</button></span></div></li>
+    <li><b>Activez le mode développeur</b>, avec l’interrupteur en haut à droite de la page.
+      <svg class="schema" viewBox="0 0 560 120" role="img" aria-label="Page des extensions de Chrome : interrupteur Mode développeur en haut à droite, activé">
+        <rect width="560" height="120" fill="#fff"/><rect width="560" height="44" fill="#F1F3F4"/>
+        <text x="20" y="28" font-family="Arial" font-size="16" fill="#202124">Extensions</text>
+        <text x="330" y="28" font-family="Arial" font-size="13" fill="#202124">Mode développeur</text>
+        <rect x="462" y="15" width="34" height="16" rx="8" fill="#8AB4F8"/><circle cx="488" cy="23" r="10" fill="#1A73E8"/>
+        <circle cx="480" cy="23" r="26" fill="none" stroke="#FFD43B" stroke-width="4"/>
+        <rect x="20" y="64" width="250" height="36" rx="6" fill="none" stroke="#DADCE0"/><text x="34" y="87" font-family="Arial" font-size="13" fill="#1A73E8">Charger l’extension non empaquetée</text>
+      </svg></li>
+    <li><b>Cliquez sur « Charger l’extension non empaquetée »</b> et choisissez le dossier <b>mon-cap-collecte</b> décompressé.
+      <span class="voir">C’est celui qui contient un fichier <i>manifest.json</i>. S’il y a deux dossiers du même nom l’un dans l’autre, choisissez celui de l’intérieur.</span>
+      <svg class="schema" viewBox="0 0 560 120" role="img" aria-label="Bouton Charger l’extension non empaquetée, en haut à gauche">
+        <rect width="560" height="120" fill="#fff"/><rect width="560" height="44" fill="#F1F3F4"/>
+        <text x="20" y="28" font-family="Arial" font-size="16" fill="#202124">Extensions</text>
+        <rect x="20" y="64" width="250" height="36" rx="6" fill="#E8F0FE" stroke="#1A73E8"/><text x="34" y="87" font-family="Arial" font-size="13" fill="#1A73E8">Charger l’extension non empaquetée</text>
+        <rect x="14" y="58" width="262" height="48" rx="10" fill="none" stroke="#FFD43B" stroke-width="4"/>
+        <text x="290" y="87" font-family="Arial" font-size="13" fill="#5F6368">Empaqueter l’extension</text>
+      </svg></li>
+    <li><b>L’assistant de Mon Cap s’ouvre</b> : suivez-le. Il vous guide pour Coba, votre Google Drive, les cours Classroom et le téléphone de votre enfant.
+      <span class="voir">Conseil : cliquez sur l’icône en forme de pièce de puzzle, en haut à droite de Chrome, puis sur l’épingle à côté de Mon Cap, pour garder son icône à portée de main.</span></li>
+  </ol></div>
+
+  <h2 id="mise-a-jour">Mettre à jour</h2>
+  <p>Quand une nouvelle version est publiée, l’icône de Mon Cap affiche <b>MAJ</b>, et sa fenêtre propose de la télécharger.</p>
+  <div class="bloc"><ol class="gestes">
+    <li><b>Téléchargez la nouvelle version</b>, depuis la fenêtre de l’icône ou avec le bouton plus haut.</li>
+    <li><b>Décompressez-la au même endroit</b> que la première fois, et acceptez de <b>remplacer les fichiers</b>.
+      <span class="voir">Même dossier, même emplacement : c’est ce qui garde vos réglages, vos identifiants et votre liaison avec Google Drive.</span></li>
+    <li><b>Rechargez l’extension</b> : <span class="code-chrome" style="padding:2px 8px">chrome://extensions</span>, puis la flèche circulaire ↻ sur la carte de Mon Cap.</li>
+  </ol></div>
+
+  <h2>Questions</h2>
+  <details class="q"><summary>Pourquoi le « mode développeur » ?</summary><p>C’est la façon d’installer une extension qui ne vient pas du Chrome Web Store. Il ne change rien d’autre au fonctionnement de Chrome.</p></details>
+  <details class="q"><summary>Chrome refuse le mode développeur</summary><p>C’est souvent le cas sur un ordinateur fourni par un employeur, dont les réglages sont verrouillés. Utilisez un ordinateur personnel.</p></details>
+  <details class="q"><summary>Mon ordinateur doit-il rester allumé ?</summary><p>Les collectes se font quand Chrome est ouvert. Si l’ordinateur dort, l’app garde les dernières données et se met à jour à la collecte suivante. Vous pouvez installer l’extension sur un second ordinateur : l’assistant explique comment le relier au même Google Drive.</p></details>
+  <details class="q"><summary>Comment tout retirer ?</summary><p>Supprimez l’extension dans chrome://extensions, puis, dans votre Google Drive, la feuille « Mon Cap » et le dossier « Mon Cap ». Sur les téléphones, supprimez l’icône Mon Cap.</p></details>
+
+  <footer class="pied"><a href="../confidentialite/">Confidentialité</a><a href="../">Ouvrir l’app</a></footer>
+</main>
+<script>
+document.getElementById('copier').onclick = async e => { try { await navigator.clipboard.writeText('chrome://extensions'); e.target.textContent = 'Copié'; } catch (x) {} };
+// lien vers la dernière version publiée
+fetch('../telechargement/derniere.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
+  if (j.telechargement) document.getElementById('dl').href = j.telechargement;
+  document.getElementById('dlInfo').textContent = 'version ' + j.version + (j.date ? ', ' + new Date(j.date + 'T12:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
+}).catch(() => {});
+</script>
+</body>
+</html>
