@@ -1,6 +1,6 @@
 {
-  "version": "0.15.5",
-  "date": "2026-10-27",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.5.zip",
-  "nouveautes": ["agenda : navigation entre les mois plus fiable, et jours à venir conservés si la lecture est incomplète"]
+  "version": "0.15.6",
+  "date": "2026-10-28",
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.6.zip",
+  "nouveautes": ["les évaluations annoncées sur Classroom sont repérées, et complètent celles de Coba"]
 }
