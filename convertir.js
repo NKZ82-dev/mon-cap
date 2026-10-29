@@ -222,8 +222,15 @@ const MOIS_FR2={janv:1,févr:2,fevr:2,mars:3,avr:4,mai:5,juin:6,juil:7,août:8,a
 const ANNONCES=[];
 const heureTexte=s=>{const m=(s||'').match(/\b(\d{1,2})(?:[:h](\d{2}))?\s*(am|pm)\b/i)||(s||'').match(/\b(\d{1,2})\s*[h:]\s*(\d{2})?/i);
   if(!m)return'';let h=+m[1];if(m[3]&&/pm/i.test(m[3])&&h<12)h+=12;return h+'h'+(m[2]||'00');};
+// Le cours d'une annonce : celui de son AUTEUR quand c'est sans ambiguïté (un résumé mal découpé ne peut
+// plus ranger le calendrier d'anglais sous Créatic). Un prof qui a deux cours garde le cours lu dans le résumé.
+const normNom=x=>(x||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]+/g,' ').trim();
+const coursDeLAuteur=auteur=>{const n=normNom(auteur);if(!n)return[];
+  return Object.entries((profil&&profil.profs)||{}).filter(([c,p])=>{const q=normNom(p.p);return q&&(q===n||n.endsWith(' '+q.split(' ').pop())&&q.split(' ').length===1||n.includes(q));}).map(([c])=>c);};
+const codeAnnonce=a=>{const lu=CR2CODE(a.cours),cand=coursDeLAuteur(a.auteur);
+  if(lu&&cand.includes(lu))return lu; if(cand.length===1)return cand[0]; return lu||cand[0]||'EVT';};
 for(const a of cr.annonces||[]){
-  const code=CR2CODE(a.cours)||'EVT', pub=(a.publie_le||'').slice(0,10);
+  const code=codeAnnonce(a), pub=(a.publie_le||'').slice(0,10);
   const an=mo=>{let y=+pub.slice(0,4)||+auj.slice(0,4);if(pub&&mo<+pub.slice(5,7)-6)y++;return y;};
   const changeant=/might change|may change|peuvent changer|sujettes? à changement/i.test(a.texte||'');
   const quand=pub?' du '+pub:'';
@@ -248,8 +255,67 @@ for(const a of cr.annonces||[]){
     }
   }
 }
+// une même annonce lue dans plusieurs résumés : un seul exemplaire de chaque élément
+{const vus=new Set();for(let i=ANNONCES.length-1;i>=0;i--){if(vus.has(ANNONCES[i].id))ANNONCES.splice(i,1);else vus.add(ANNONCES[i].id);}}
 // une même récup annoncée plusieurs fois (rappel la veille, etc.) : une seule fois
 {const vus=new Set();for(let i=RECUPS.length-1;i>=0;i--){const k=RECUPS[i].c+'|'+RECUPS[i].d+'|'+RECUPS[i].time;if(vus.has(k))RECUPS.splice(i,1);else vus.add(k);}}
+
+// --- ÉVALUATIONS ANNONCÉES SUR CLASSROOM (texte des travaux et du matériel, annonces, faits de l'IA) ---
+// Une phrase qui parle d'une évaluation ET donne une date en clair. Croisée avec Coba (même matière, à 3 jours près) :
+// - déjà dans Coba : la fiche s'enrichit du texte du prof (« Sur Classroom ») ;
+// - absente de Coba : l'évaluation est ajoutée, avec la mention « Annoncé sur Classroom ».
+const RE_EVAL=/\b(test|examen|exam|quiz|[ée]valuation|dict[ée]e|contr[ôo]le|sae)\b/i;
+const RE_DATE_FR=/\b(\d{1,2})(?:er)?\s+(janv|f[ée]vr|mars|avr|mai|juin|juil|ao[uû]t|sept|oct|nov|d[ée]c)[a-zéû]*\.?/i;
+const RE_DATE_EN=/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?\b/i;
+const MOIS_N={janv:1,fevr:2,févr:2,mars:3,avr:4,mai:5,juin:6,juil:7,aout:8,août:8,sept:9,oct:10,nov:11,dec:12,déc:12};
+function datesEvaluation(texte,ref){
+  const r=(ref||auj).slice(0,10),out=[];
+  const an=mo=>{let y=+r.slice(0,4);if(mo<+r.slice(5,7)-6)y++;return y;};
+  for(const ligne of (texte||'').split(/\n|(?<=[.!?])\s+/)){
+    if(!RE_EVAL.test(ligne))continue;
+    let m=ligne.match(RE_DATE_FR),d=null;
+    if(m){const mo=MOIS_N[m[2].toLowerCase().replace('é','e').replace('û','u').slice(0,4)]||MOIS_N[m[2].toLowerCase().slice(0,4)]||MOIS_N[m[2].toLowerCase().slice(0,3)];if(mo)d=an(mo)+'-'+String(mo).padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+    else if((m=ligne.match(RE_DATE_EN))){const mo=MOIS_EN2[m[1].toLowerCase()];d=an(mo)+'-'+String(mo).padStart(2,'0')+'-'+m[2].padStart(2,'0');}
+    if(d)out.push({d,ligne:ligne.trim(),mot:ligne.match(RE_EVAL)[1]});
+  }
+  return out;
+}
+const CANDIDATS=[];
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+// 1. texte des travaux et du matériel Classroom
+for(const p of cr.publications||[]) for(const e of p.elements||[]){
+  const code=CR2CODE(p.cours); if(!code)continue;
+  for(const x of datesEvaluation((e.titre||'')+'\n'+(e.detail||''),e.date||auj))
+    CANDIDATS.push({d:x.d,c:code,t:cap(x.mot.toLowerCase())+' ('+(e.titre||p.cours)+')',texte:(e.detail||x.ligne).trim(),source:'Classroom, '+(e.titre||p.cours)+(e.date_libelle?' ('+e.date_libelle.replace(/^Publié\s*:\s*/i,'publié ')+')':'')});
+}
+// 2. annonces des profs (y compris les lignes « Test » des calendriers)
+for(const a of cr.annonces||[]){
+  const code=codeAnnonce(a);
+  for(const x of datesEvaluation(a.texte,a.publie_le)){
+    const apres=(x.ligne.split(/[:\-–]\s*/).slice(1).join(' : ')||x.ligne).trim();
+    CANDIDATS.push({d:x.d,c:code,t:apres.length<60?apres:cap(x.mot.toLowerCase()),texte:x.ligne,source:'Annonce Classroom'+(a.auteur?' de '+a.auteur:'')});
+  }
+  for(const f of ((a.extraction||{}).elements||[])) if(f.type==='examen'&&f.date&&!f.a_valider)
+    CANDIDATS.push({d:f.date,c:code,t:f.titre||'Évaluation',texte:(f.citation||'').trim(),source:'Annonce Classroom'+(a.auteur?' de '+a.auteur:'')});
+}
+// 3. examens trouvés par l'IA dans les courriels de l'école
+for(const m of coba.courriels||[]){
+  if(m.suivi||m.ia_ignore)continue;
+  for(const f of ((m.extraction||{}).elements||[])) if(f.type==='examen'&&f.date&&!f.a_valider){
+    const code=CR2CODE(m.objet)||PROF2CODE[(m.expediteur||'').trim().split(/\s+/).pop()]; if(!code)continue;
+    CANDIDATS.push({d:f.date,c:code,t:f.titre||'Évaluation',texte:(f.citation||'').trim(),source:'Courriel'+(m.expediteur?' de '+m.expediteur:'')});
+  }
+}
+const EVALS_CLASSROOM=[];
+{const ecart=(a,b)=>Math.abs((Date.parse(a+'T12:00')-Date.parse(b+'T12:00'))/864e5);
+ const evalsCoba=ITEMS.filter(i=>/^(exam|sae|test)$/.test(i.ty));
+ for(const k of CANDIDATS){
+   const cible=evalsCoba.find(i=>i.c===k.c&&ecart(i.d,k.d)<=3)||EVALS_CLASSROOM.find(i=>i.c===k.c&&i.d===k.d);
+   const comp={source:k.source,texte:k.texte};
+   if(cible){cible.complements=cible.complements||[];if(!cible.complements.some(c=>c.texte===comp.texte))cible.complements.push(comp);continue;}
+   const ty=/dict[ée]e/i.test(k.t)?'test':'exam';
+   EVALS_CLASSROOM.push({id:slug('cl-ev-'+k.c+'-'+k.d),d:k.d,c:k.c,t:k.t,ty,src:'C',fromClassroom:1,complements:[comp]});
+ }}
 
 // --- ÉVÉNEMENTS annoncés par courriel (match, atelier, activité) : datés et validés seulement.
 // Les examens et travaux restent ceux de la page Travaux de Coba, qui fait foi.
@@ -281,7 +347,7 @@ return {
   genere_le:col.collecte_le,
   agenda:AGENDA,
   conges:CONGES,
-  items:ITEMS.concat(ANNONCES),
+  items:ITEMS.concat(ANNONCES,EVALS_CLASSROOM),
   grades:GRADES,
   provisoires:PROVISOIRES,
   nograde:NOGRADE,

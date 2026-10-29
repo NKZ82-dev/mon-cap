@@ -1,0 +1,125 @@
+[
+ {
+  "version": "0.15.7",
+  "app": "23",
+  "date": "2026-10-28",
+  "ajoute": [
+   "Pages d’aide pour les parents et pour l’élève, et cette page de nouveautés, sur le site de Mon Cap.",
+   "Liens « Aide » et « Nouveautés » dans les Réglages, l’assistant, la fenêtre de l’icône et l’app.",
+   "Le bandeau « Nouvelle version disponible » propose « Quoi de neuf ? », qui ouvre les nouveautés de cette version."
+  ]
+ },
+ {
+  "version": "0.15.6",
+  "app": "22",
+  "date": "2026-10-28",
+  "ajoute": [
+   "Les évaluations annoncées sur Classroom (texte des travaux et du matériel, annonces, courriels) sont repérées quand elles ont une date.",
+   "Une évaluation déjà dans Coba s’enrichit d’une section « Sur Classroom » avec le texte du prof ; une évaluation absente de Coba apparaît avec l’étiquette 📣 Classroom."
+  ]
+ },
+ {
+  "version": "0.15.5",
+  "date": "2026-10-27",
+  "corrige": [
+   "Agenda : le passage au mois suivant dans Coba est plus tenace (plusieurs essais, délai plus long).",
+   "Si l’agenda revient incomplet, les jours à venir déjà connus sont repris au lieu de disparaître de l’app."
+  ]
+ },
+ {
+  "version": "0.15.4",
+  "date": "2026-10-26",
+  "corrige": [
+   "Une annonce Classroom relue remplace sa version précédente : une erreur de rangement ne peut plus rester.",
+   "Les résumés Classroom quotidiens sont reconnus (prénom de l’enfant et liste des cours)."
+  ]
+ },
+ {
+  "version": "0.15.3",
+  "app": "21",
+  "date": "2026-10-26",
+  "corrige": [
+   "Les annonces Classroom sont rangées dans le cours de leur prof : plus de lecture d’anglais affichée en Créatic.",
+   "Une même annonce lue dans plusieurs résumés ne compte qu’une fois."
+  ]
+ },
+ {
+  "version": "0.15.2",
+  "date": "2026-10-26",
+  "ajoute": [
+   "Bouton « Vérifier les mises à jour », dans les Réglages et le menu Plus."
+  ]
+ },
+ {
+  "version": "0.15.1",
+  "date": "2026-10-26",
+  "ajoute": [
+   "Le numéro de version est affiché dans les Réglages, l’assistant et la fenêtre de l’icône."
+  ]
+ },
+ {
+  "version": "0.15.0",
+  "app": "20",
+  "date": "2026-10-26",
+  "ajoute": [
+   "Avertissement automatique des nouvelles versions : badge MAJ sur l’icône, et téléchargement proposé.",
+   "Page d’installation et page de confidentialité sur le site."
+  ]
+ },
+ {
+  "version": "0.14",
+  "app": "17 à 19",
+  "date": "2026-10-25",
+  "ajoute": [
+   "Nouvelle page Réglages, simple, avec l’état de chaque élément en une ligne et une section Dépannage.",
+   "Fenêtre de l’icône repensée : dernière collecte, chiffres, un bouton, et le suivi en direct pendant une collecte.",
+   "Le nom du relais est affiché dans l’extension et dans l’app, pour vérifier qu’ils écrivent au même endroit.",
+   "App : la fiche « 📝 Mes ajouts » regroupe tous les ajouts faits à la main, sans limite de date."
+  ],
+  "modifie": [
+   "Les données sont déposées dans Drive dès que Coba et Classroom sont lus, sans attendre l’IA.",
+   "L’extension prend l’icône de l’app, et les pages s’élargissent sur grand écran.",
+   "Changer de lien sur un téléphone, c’est changer de foyer : l’app repart des données du nouveau relais."
+  ],
+  "corrige": [
+   "Le QR code des téléphones suit toujours la liaison en cours.",
+   "Les coches non envoyées sont signalées et renvoyées à la synchronisation suivante.",
+   "Mode sombre : surlignage lisible."
+  ]
+ },
+ {
+  "version": "0.13",
+  "date": "2026-10-25",
+  "ajoute": [
+   "Assistant d’installation en sept étapes, avec QR code pour les téléphones.",
+   "Relais installé en copiant une feuille Google, avec un menu Mon Cap et un code de liaison unique.",
+   "Les cours Classroom sont trouvés automatiquement dans les résumés Gmail.",
+   "Suivi en direct de la première collecte."
+  ],
+  "corrige": [
+   "Une demande manuelle fait démarrer tout de suite une collecte automatique en attente.",
+   "Une collecte ou un test resté bloqué n’empêche plus les suivants."
+  ]
+ },
+ {
+  "version": "0.12",
+  "app": "8 à 16",
+  "date": "2026-10-20",
+  "ajoute": [
+   "App : coches partagées entre les téléphones, tirer pour synchroniser, thème clair ou sombre.",
+   "App : un lien de téléphone périmé est détecté, et « Relier à un autre lien » permet d’en changer."
+  ],
+  "corrige": [
+   "Une collecte ratée côté Coba ne remplace plus de bonnes données, et l’app refuse des données nettement plus pauvres.",
+   "Un cours Classroom revenu vide est relu, puis complété par la collecte précédente."
+  ]
+ },
+ {
+  "version": "0.11",
+  "date": "2026-10-20",
+  "ajoute": [
+   "Relais Google : les données vont dans votre Drive et les téléphones les reçoivent sans import.",
+   "Les annonces des profs sont lues dans les résumés Classroom envoyés aux tuteurs."
+  ]
+ }
+]

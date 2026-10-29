@@ -165,3 +165,18 @@ details.q{border-bottom:1px dashed var(--trait);padding:12px 0}
 details.q summary{cursor:pointer;font-weight:600}
 details.q p{margin:8px 0 0}
 @media (max-width:760px){.trois{grid-template-columns:1fr}}
+.liens-site{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap}
+.liens-site a{color:var(--doux);font-size:.92rem}
+.sommaire-page{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 8px;font-size:.95rem}
+.tableau{width:100%;border-collapse:collapse;margin:8px 0}
+.tableau th,.tableau td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px dashed var(--trait)}
+.tableau th{font-weight:600;color:var(--doux);font-size:.85rem}
+.tableau td:first-child{font-weight:500;width:45%}
+.version{border-top:2px dashed var(--trait);padding:20px 0 6px}
+.version h2{margin:0 0 4px;font-size:1.3rem}
+.version .date{color:var(--doux);font-size:.9rem;margin:0 0 10px}
+.version h3{font-size:.95rem;margin:12px 0 4px}
+.version ul{margin:0;padding-left:20px}
+.version li{margin:3px 0}
+.etiq{display:inline-block;font-size:.75rem;font-weight:600;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle;border:1.5px solid var(--trait);color:var(--doux)}
+.version:target{background:color-mix(in srgb,var(--surligneur) 12%,transparent);border-radius:12px;padding-left:12px;padding-right:12px}

@@ -154,6 +154,7 @@ h3.wk span{font-family:'Lexend',sans-serif;font-weight:400;font-size:.85rem}
 @media (prefers-reduced-motion:reduce){#ptr.tourne span{animation:none}}
 .comp{border-left:4px solid var(--line);padding:6px 0 6px 12px;margin:0 0 12px}
 button.lien{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;font:inherit;cursor:pointer}
+a.lien{color:var(--ink);text-decoration:underline}
 .btn.danger{background:var(--card);color:var(--warn);border-color:var(--warn)}
 .manual{font-size:.88rem;color:var(--soft);margin:0}
 .fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:30;width:60px;height:60px;border-radius:50%;border:3px solid var(--line);background:var(--hl);color:var(--onhl);font-size:2.1rem;line-height:1;font-weight:600;cursor:pointer;box-shadow:3px 3px 0 var(--shc)}
@@ -868,7 +869,7 @@ function cycleDayCalc(s){
 const NEXT=nextSchool(TODAY);
 
 /* ===== État : seulement les cases cochées ===== */
-const VERSION_APP='22';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
+const VERSION_APP='23';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
 const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();
@@ -1074,6 +1075,7 @@ function renderJour(){
   h+='<section class="sec"><h2 class="sh"><span>📤 À remettre '+(isT?'aujourd’hui':esc(when(d)))+'</span></h2>'+(due.length?due.map(i=>tile(i,{mode:'due'})).join(''):'<div class="empty">Rien à remettre.</div>')+'</section>';
   if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
   if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
+  h+='<p class="src"><a class="lien" href="aide/eleve/">Aide</a> · <a class="lien" href="nouveautes/">Nouveautés</a></p>';
   h+='<p class="src">Version '+VERSION_APP+' · Thème : <button class="lien" data-act="theme">'+({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)')+'</button></p>';
   h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Google Drive : relais '+esc(RELAIS_COURT)+'. Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button> · <button class="lien" data-act="delier">Relier à un autre lien</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
   $('#view').innerHTML=h;

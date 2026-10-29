@@ -1,6 +1,6 @@
 /* Mon Cap — service worker : l'app fonctionne hors connexion.
    Aucune donnée personnelle n'est ici : les données restent dans le stockage du téléphone. */
-const VERSION = 'mon-cap-22';
+const VERSION = 'mon-cap-23';
 const COQUILLE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -17,7 +17,7 @@ self.addEventListener('fetch', e => {
   // toujours depuis le réseau, jamais remplacé par l'app ni gardé en cache
   const racine = new URL('./', location.href).pathname;
   const chemin = url.pathname.startsWith(racine) ? url.pathname.slice(racine.length) : null;
-  if (url.origin === location.origin && chemin !== null && /^(installer|confidentialite|telechargement)(\/|$|\.)/.test(chemin)) return;
+  if (url.origin === location.origin && chemin !== null && /^(installer|confidentialite|telechargement|aide|nouveautes)(\/|$|\.)/.test(chemin)) return;
   // La page de l'app : réseau d'abord (pour recevoir les mises à jour), cache si hors connexion
   if ((req.mode === 'navigate' && url.origin === location.origin) || url.pathname.endsWith('/index.html')) {
     // cache: 'no-cache' : toujours demander à GitHub si la page a changé (réponse légère si elle n'a pas changé),

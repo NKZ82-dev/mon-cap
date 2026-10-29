@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon Cap — Aide</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body>
+<header class="entete"><img src="../icons/icon-192.png" alt="" width="40" height="40"><span class="marque">Mon Cap</span>
+  <nav class="liens-site"><a href="../aide/">Aide</a><a href="../aide/eleve/">Guide de l’élève</a><a href="../nouveautes/">Nouveautés</a></nav></header>
+<main class="page">
+  <h1>Aide</h1>
+  <p class="chapeau">Comment Mon Cap fonctionne, ce qu’il fait tout seul, et quoi faire quand quelque chose coince.</p>
+  <nav class="sommaire-page"><a href="#fonctionnement">Fonctionnement</a><a href="#collectes">Les collectes</a><a href="#telephones">Les téléphones</a><a href="#ordinateurs">Plusieurs ordinateurs</a><a href="#maj">Mises à jour</a><a href="#journal">Le journal</a><a href="#questions">Questions</a></nav>
+
+  <h2 id="fonctionnement">Comment ça fonctionne</h2>
+  <div class="trois">
+    <div class="bloc"><span class="num">1</span><b>L’extension relève</b>Sur votre ordinateur, elle se connecte au portail Coba avec vos identifiants, lit Classroom dans la vue tuteur, et lit les résumés Classroom de votre Gmail.</div>
+    <div class="bloc"><span class="num">2</span><b>Le relais range</b>Une feuille Google copiée dans votre compte contient un petit programme. Il dépose les données dans le dossier « Mon Cap » de votre Drive.</div>
+    <div class="bloc"><span class="num">3</span><b>L’app affiche</b>Sur le téléphone, l’app récupère les données à chaque ouverture, et partage les coches entre les téléphones de la famille.</div>
+  </div>
+  <h3 style="margin-top:22px">Ce que Mon Cap lit</h3>
+  <ul class="liste">
+    <li><b>Coba</b> : les travaux et évaluations, l’agenda des quatre prochains mois avec le jour du cycle, l’horaire, les activités, les commentaires des profs et les courriels de l’école.</li>
+    <li><b>Classroom</b> : les travaux, consignes et pièces jointes de chaque cours, et les annonces des profs, que seuls les résumés par courriel contiennent.</li>
+    <li><b>L’aide à la lecture</b>, si l’ordinateur le permet : l’IA de Chrome repère dans les messages les récupérations, sorties, changements et évaluations. Elle tourne sur l’ordinateur.</li>
+  </ul>
+  <p>Mon Cap croise ces sources : une évaluation annoncée sur Classroom complète celle de Coba, ou apparaît avec la mention « Annoncé sur Classroom » si Coba ne l’a pas encore.</p>
+
+  <h2 id="collectes">Les collectes</h2>
+  <ul class="liste">
+    <li><b>Automatiques</b> toutes les 3 heures, tant que Chrome est ouvert sur l’ordinateur. Une collecte attend un moment où vous n’utilisez pas l’ordinateur, pour ne pas vous gêner. La fréquence se règle dans Réglages → Les collectes.</li>
+    <li><b>À la demande</b> : bouton « Lancer une collecte », dans la fenêtre de l’icône ou les Réglages. Une demande manuelle passe devant une collecte automatique en attente.</li>
+    <li><b>En deux temps</b> : les données sont déposées dans Drive dès que Coba et Classroom sont lus, puis complétées une fois que l’IA a lu les messages.</li>
+    <li><b>Prudentes</b> : une collecte ratée ou incomplète ne remplace jamais de bonnes données. Un cours Classroom illisible ou un agenda tronqué est complété par la collecte précédente, et le journal le signale.</li>
+  </ul>
+
+  <h2 id="telephones">Les téléphones</h2>
+  <ul class="liste">
+    <li><b>Relier un téléphone</b> : Réglages → Les téléphones, puis visez le QR code avec l’appareil photo. Sur iPhone, l’app guide l’installation en trois gestes : Copier mon code, Sur l’écran d’accueil, Coller mon code.</li>
+    <li><b>Les coches sont partagées</b> entre tous les téléphones reliés, y compris les ajouts faits à la main.</li>
+    <li><b>Se mettre à jour</b> : l’app se synchronise à l’ouverture, chaque minute, et quand on tire l’écran vers le bas.</li>
+    <li><b>Téléphone perdu</b> : dans votre feuille Mon Cap, menu Mon Cap → Changer la clé des téléphones. Les anciens liens cessent aussitôt de fonctionner. Reliez ensuite le nouveau code dans les Réglages, et rescannez le QR code avec les téléphones de la famille.</li>
+    <li><b>Quel relais ?</b> En bas de l’onglet Jour, l’app affiche le nom de son relais (« relais …xxxxxx ») ; les Réglages de l’extension affichent le même. S’ils diffèrent, téléphone et ordinateur n’écrivent pas dans le même Drive.</li>
+    <li><b>Ne partagez jamais</b> le lien ou le QR code des téléphones, ni votre code de liaison : ils donnent accès aux données de votre enfant. Pour faire découvrir Mon Cap, envoyez la page d’installation.</li>
+  </ul>
+
+  <h2 id="ordinateurs">Plusieurs ordinateurs</h2>
+  <p>Installez l’extension sur le second ordinateur et suivez l’assistant, sauf à l’étape Google Drive : <b>ne recopiez pas la feuille</b>. Dans votre feuille existante, menu Mon Cap → 2. Obtenir mon code de liaison, avec l’adresse du déploiement actuel, puis collez ce code. Les deux ordinateurs collectent sans se gêner : une seule collecte a lieu à la fois, et aucune n’écrase un dépôt plus récent.</p>
+
+  <h2 id="maj">Mises à jour</h2>
+  <p>L’extension vérifie chaque jour s’il existe une nouvelle version ; son icône affiche alors <b>MAJ</b>. On peut aussi vérifier tout de suite : menu Plus → Vérifier les mises à jour. Pour installer : téléchargez le zip, décompressez-le <b>dans le même dossier</b> en remplaçant les fichiers, puis rechargez l’extension (↻ dans chrome://extensions). Ce qui change à chaque version est décrit dans les <a href="../nouveautes/">nouveautés</a>.</p>
+
+  <h2 id="journal">Le journal</h2>
+  <p>Réglages → Dépannage → Journal. Les messages les plus utiles :</p>
+  <table class="tableau">
+    <tr><th>Message</th><th>Ce que ça veut dire, et quoi faire</th></tr>
+    <tr><td>Drive : données déposées ; les compléments de l’IA suivront</td><td>Tout va bien : les téléphones peuvent déjà se mettre à jour.</td></tr>
+    <tr><td>Drive : collecte Coba incomplète ; rien n’est déposé</td><td>Coba n’a pas été lu (connexion refusée, portail lent). Les données précédentes restent en place. Vérifiez les identifiants dans Réglages → L’école, puis relancez.</td></tr>
+    <tr><td>Coba : agenda incomplet ; … jour(s) à venir repris</td><td>Le portail n’a pas laissé passer au mois suivant. L’app reste complète. Si cela se répète, envoyez un « Analyser le portail » (Dépannage) à la personne qui vous aide.</td></tr>
+    <tr><td>Classroom : « … » illisible cette fois ; éléments précédents conservés</td><td>Une page Classroom ne s’est pas affichée à temps. Rien n’est perdu ; la collecte suivante la relira.</td></tr>
+    <tr><td>Collecte déjà en cours sur un autre ordinateur</td><td>Normal avec deux ordinateurs : l’autre s’en charge.</td></tr>
+    <tr><td>Relais : le relais n’a pas répondu en 20 s</td><td>Google est lent ou le déploiement a changé. Réessayez ; si cela persiste, vérifiez le déploiement de votre feuille (Gérer les déploiements).</td></tr>
+    <tr><td>Drive : une collecte plus récente a été déposée par un autre ordinateur</td><td>Protection contre l’écrasement : rien à faire.</td></tr>
+  </table>
+  <p>Côté téléphone, en bas de l’onglet Jour :</p>
+  <table class="tableau">
+    <tr><th>Message</th><th>Ce que ça veut dire, et quoi faire</th></tr>
+    <tr><td>données reçues incomplètes, les précédentes sont gardées</td><td>La dernière collecte était nettement plus pauvre que d’habitude. L’app garde les bonnes données ; regardez le journal de l’extension.</td></tr>
+    <tr><td>coches non envoyées, nouvel essai bientôt</td><td>Le relais n’a pas répondu. Les coches partiront à la synchronisation suivante.</td></tr>
+    <tr><td>Le lien de cet appareil n’est plus valide</td><td>La clé des téléphones a changé. Collez le nouveau lien avec « Coller mon code ».</td></tr>
+  </table>
+
+  <h2 id="questions">Questions</h2>
+  <details class="q"><summary>L’ordinateur doit-il rester allumé ?</summary><p>Les collectes se font quand Chrome est ouvert. Si l’ordinateur dort, l’app garde les dernières données, et la collecte reprend au réveil.</p></details>
+  <details class="q"><summary>Pourquoi des courriels de l’école n’apparaissent pas dans l’app ?</summary><p>L’app est faite pour l’élève : les messages destinés aux parents, le suivi personnalisé et les invitations sont volontairement écartés. Vous les retrouvez dans Coba.</p></details>
+  <details class="q"><summary>Les annonces des profs arrivent en retard</summary><p>Elles viennent des résumés Classroom envoyés aux tuteurs. Réglez leur fréquence sur « quotidien », depuis le lien en bas d’un résumé.</p></details>
+  <details class="q"><summary>Comment tout retirer ?</summary><p>Supprimez l’extension dans chrome://extensions, puis, dans votre Drive, la feuille Mon Cap et le dossier « Mon Cap ». Sur les téléphones, supprimez l’icône de l’app.</p></details>
+  <footer class="pied"><a href="../installer/">Installer Mon Cap</a><a href="../aide/">Aide</a><a href="../nouveautes/">Nouveautés</a><a href="../confidentialite/">Confidentialité</a><a href="../">Ouvrir l’app</a></footer>
+</main>
+</body>
+</html>
