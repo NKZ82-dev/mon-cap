@@ -1,5 +1,16 @@
 [
  {
+  "version": "app",
+  "app": "24",
+  "date": "2026-10-29",
+  "modifie": [
+   "Dans une fiche, « Marquer comme fait » est une action : tant que le travail n’est pas coché, le bouton le dit. Une fois coché, une bande verte « C’est fait » s’affiche, avec Annuler.",
+   "L’onglet Suivi signale les notes arrivées depuis la dernière visite : un point sur l’onglet, un bandeau, et l’étiquette Nouveau sur la matière.",
+   "L’onglet Évaluations fait de même pour une évaluation qui apparaît depuis la dernière visite.",
+   "En bas de l’onglet Jour, seule l’heure du relevé reste affichée. Version, thème, aide et synchronisation sont dans Détails. L’app actualise toute seule, plus souvent quand le relevé date, et « Actualiser maintenant » force un passage."
+  ]
+ },
+ {
   "version": "0.15.7",
   "app": "23",
   "date": "2026-10-28",

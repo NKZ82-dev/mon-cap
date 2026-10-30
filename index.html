@@ -383,6 +383,25 @@ button.grade.cbtn{padding-right:36px}
 .prow2 .pn{font-weight:500}
 .cs p{margin:12px 0;line-height:1.45}
 .cs .tile{margin-top:4px}
+/* Fiche : « Marquer comme fait » est une action ; « C’est fait » est un état */
+.btn.marquer{justify-content:flex-start;text-align:left;background:transparent;color:var(--ink);border:2px dashed var(--line);gap:12px;padding-left:16px}
+.btn.marquer .rond{width:22px;height:22px;border:2px solid var(--line);border-radius:50%;flex:none}
+.btn.marquer .mt{display:flex;flex-direction:column;line-height:1.25}
+.btn.marquer small{font-weight:500;color:var(--soft);font-size:.78rem}
+.fait-bande{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;min-height:52px;padding:8px 8px 8px 14px;border-radius:14px;background:color-mix(in srgb,var(--ok) 16%,var(--card));border:2px solid var(--ok)}
+.fait-bande b{color:var(--ok)}
+.fait-bande .btn{width:auto;margin:0;min-height:44px;padding:8px 14px}
+.btn[disabled]{opacity:.55;cursor:default}
+/* Notes nouvelles */
+.bandeau-notes{margin:0 0 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--hl) 34%,var(--card));font-weight:600;line-height:1.35}
+.chip.neuf{background:var(--hl);color:var(--onhl);border-color:transparent;font-size:.72rem;font-weight:700}
+.grade .nomligne{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.grade.neuf{box-shadow:inset 4px 0 0 var(--hl)}
+.proj.neuf{outline:2px solid var(--hl);outline-offset:2px}
+.ruler .dot.neuf{box-shadow:0 0 0 3px var(--hl)}
+.tabs button{position:relative}
+.pastille{position:absolute;top:4px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--hl);box-shadow:0 0 0 2px var(--paper)}
+.releve{margin-top:22px}
 </style>
 </head>
 <body>
@@ -869,7 +888,7 @@ function cycleDayCalc(s){
 const NEXT=nextSchool(TODAY);
 
 /* ===== État : seulement les cases cochées ===== */
-const VERSION_APP='23';   // à garder égal au numéro de sw.js (mon-cap-N), affiché en bas de l'onglet Jour
+const VERSION_APP='24';   // à garder égal au numéro de sw.js (mon-cap-N), affiché dans Détails
 const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();
@@ -924,14 +943,38 @@ function save(){horodater();try{localStorage.setItem(KEY,JSON.stringify(S));}cat
   if(RELAIS){clearTimeout(envoiPrevu);envoiPrevu=setTimeout(envoyerEtat,1500);}}
 /* À l'ouverture et au retour dans l'app : nouvelles données et coches de l'autre téléphone */
 let ETAT_SYNC=RELAIS?'en cours':'local';
-async function synchroniser(){
-  if(!RELAIS)return;
+let syncEnCours=false,dernierSync=0;
+function statutCourt(s){
+  s=s==null?ETAT_SYNC:s;
+  if(s==='en cours')return 'cours';
+  if(/^hors connexion|^erreur|^coches non|^données reçues incomplètes/.test(s))return 'probleme';
+  return 'ok';
+}
+/* Vérifier souvent seulement quand le relevé est ancien (l'ordinateur a pu collecter) ou après un échec. */
+function syncUtile(){
+  if(!RELAIS||document.visibilityState!=='visible'||syncEnCours)return false;
+  const depuis=Date.now()-dernierSync;
+  if(statutCourt()==='probleme')return depuis>20000;
+  const age=COLLECTE.genere_le?(Date.now()-new Date(COLLECTE.genere_le).getTime())/60000:1e9;
+  if(age>=120)return depuis>45000;
+  return depuis>3*60000;
+}
+async function synchroniser(force){
+  if(!RELAIS)return false;
+  if(syncEnCours)return null;
+  if(!force&&dernierSync&&!syncUtile())return null;
+  syncEnCours=true;
+  const avant=ETAT_SYNC;
+  if(force){ETAT_SYNC='en cours';majLigneReleve();if(UI.sheet==='__infos')afficherFiche(infosSheet());}
   try{
     const [d,e]=await Promise.all([relais('lire',{fichier:'donnees'}),relais('lire',{fichier:'etat'})]);
     if(!d.ok){
       // clé changée ou révoquée (téléphone perdu, nouvelle clé) : oublier ce lien et demander le nouveau
-      if(d.erreur==='clé refusée'){localStorage.removeItem('mon-cap-relais');try{sessionStorage.setItem('mon-cap-lien-perime','1');}catch(e){}location.reload();return;}
-      ETAT_SYNC='erreur : '+(d.erreur||'?');render();return;}
+      if(d.erreur==='clé refusée'){localStorage.removeItem('mon-cap-relais');try{sessionStorage.setItem('mon-cap-lien-perime','1');}catch(e){}location.reload();return false;}
+      ETAT_SYNC='erreur : '+(d.erreur||'?');dernierSync=Date.now();
+      if(statutCourt(avant)!==statutCourt()||force)render();else majLigneReleve();
+      if(UI.sheet==='__infos')afficherFiche(infosSheet());
+      return false;}
     let recharger=false,incompletes=false;
     if(d.contenu&&d.contenu.genere_le&&(!COLLECTE.genere_le||d.contenu.genere_le>COLLECTE.genere_le)){
       // Données nettement plus pauvres que celles déjà là (collecte ratée) : on garde les nôtres
@@ -941,13 +984,26 @@ async function synchroniser(){
     const change=e.ok&&fusionner(e.contenu);
     if(ENVOI_EN_ATTENTE)envoyerEtat();
     ETAT_SYNC=incompletes?'données reçues incomplètes, les précédentes sont gardées':'à jour à '+new Date().toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
-    if(recharger){location.reload();return;}
-    render();
-  }catch(x){ETAT_SYNC='hors connexion';render();}
+    dernierSync=Date.now();
+    if(recharger){location.reload();return true;}
+    if(change||statutCourt(avant)!==statutCourt()){
+      const id=UI.sheet;
+      if(id&&!String(id).startsWith('__'))refresh();else render();
+    }else majLigneReleve();
+    if(UI.sheet==='__infos')afficherFiche(infosSheet());
+    return true;
+  }catch(x){
+    ETAT_SYNC='hors connexion';dernierSync=Date.now();
+    if(statutCourt(avant)!=='probleme'||force)render();else majLigneReleve();
+    if(UI.sheet==='__infos')afficherFiche(infosSheet());
+    return false;
+  }finally{syncEnCours=false;}
 }
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')synchroniser();});
-/* Toutes les minutes tant que l'app est ouverte et visible */
-setInterval(()=>{if(RELAIS&&document.visibilityState==='visible')synchroniser();},60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')synchroniser(true);});
+window.addEventListener('online',()=>synchroniser(true));
+/* Tant que l'app est ouverte : souvent si le relevé a plus de deux heures, sinon environ toutes les 3 minutes. */
+setInterval(()=>synchroniser(false),20000);
+setInterval(majLigneReleve,30000);
 /* Tirer vers le bas, en haut de page, pour synchroniser (l'app installée sur iPhone n'a pas ce geste).
    Le cadre (#ptr) se place, la flèche (span) tourne : sur Safari, tourner l'élément déjà décalé le ferait orbiter.
    iOS annule souvent le geste (touchcancel) quand il prend la main pour son rebond : traité comme une fin. */
@@ -960,7 +1016,7 @@ setInterval(()=>{if(RELAIS&&document.visibilityState==='visible')synchroniser();
  const fin=async()=>{if(y0===null)return;const d=tire*0.6;y0=null;tire=0;
    if(d>70&&RELAIS&&!enCours){enCours=true;placer(70);fl.textContent='↻';ind.classList.add('tourne');ETAT_SYNC='en cours';
      const garde=setTimeout(()=>{cacher();enCours=false;},10000);   // l'indicateur ne reste jamais affiché
-     try{await synchroniser();toast('À jour');}finally{clearTimeout(garde);cacher();enCours=false;}}
+     try{const ok=await synchroniser(true);if(ok===true)toast('À jour');else if(ok===false)toast('Actualisation impossible');}finally{clearTimeout(garde);cacher();enCours=false;}}
    else cacher();};
  window.addEventListener('touchend',fin,{passive:true});window.addEventListener('touchcancel',fin,{passive:true});}
 const UI={tab:'jour',day:(isSchool(TODAY)&&NOWMIN<15*60)?'today':'next',week:0,sheet:null,last:null};
@@ -997,7 +1053,7 @@ function typeChip(i,mode){
 function tile(i,o){
   o=o||{};const c=co(i),dn=isDone(i.id),ev=isEv(i);
   const chips='<span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i,o.mode)+(o.date?'<span class="chip">'+esc(cap(when(i.d)))+'</span>':'')+(i.time?'<span class="chip">'+esc(i.time)+'</span>':'')+(i.src==='M'?'<span class="chip">✍️ Ajouté</span>':'')+(i.fromClassroom?'<span class="chip">📣 Classroom</span>':'');
-  const left=ev?'<div class="emo" aria-hidden="true">'+c.e+'</div>':'<button class="chk" data-act="toggle" data-id="'+i.id+'" aria-pressed="'+dn+'" aria-label="'+(dn?'Pas encore fait : ':'Fait : ')+esc(i.t)+'"><span class="box">'+(dn?'✓':'')+'</span></button>';
+  const left=ev?'<div class="emo" aria-hidden="true">'+c.e+'</div>':'<button class="chk" data-act="toggle" data-id="'+i.id+'" aria-pressed="'+dn+'" aria-label="'+(dn?'Marquer comme pas encore fait : ':'Marquer comme fait : ')+esc(i.t)+'"><span class="box">'+(dn?'✓':'')+'</span></button>';
   return '<div class="tile'+(dn?' done':'')+(UI.pop==='d:'+i.id?' pop':'')+'" style="'+cv(c)+'"><div class="band"></div>'+left+'<button class="body" data-act="open" data-id="'+i.id+'"><span class="title">'+esc(i.t)+'</span><span class="chips">'+chips+'</span></button></div>';
 }
 function fold(id,sum,body){return '<details class="fold" data-fold="'+id+'"'+(S.open[id]?' open':'')+'><summary>'+sum+'</summary><div>'+body+'</div></details>';}
@@ -1008,7 +1064,14 @@ function renderTop(){$('#top').innerHTML='';return;
 }
 function renderTabs(){
   const T=[['jour','📅','Jour'],['semaine','🗓️','Semaine'],['gros','⭐','Évaluations'],['notes','📈','Suivi']];
-  const bt=t=>'<button data-act="tab" data-v="'+t[0]+'"'+(UI.tab===t[0]?' aria-current="page"':'')+'><span aria-hidden="true">'+t[1]+'</span>'+t[2]+'</button>';
+  const neufNotes=UI.tab!=='notes'&&Object.keys(nouvellesParCours()).length;
+  const neufEvals=UI.tab!=='gros'&&nouvellesEvals().length;
+  const bt=t=>{
+    const neuf=t[0]==='notes'?neufNotes:t[0]==='gros'?neufEvals:0;
+    const dot=neuf?'<span class="pastille" aria-hidden="true"></span>':'';
+    const label=t[0]==='notes'&&neuf?' aria-label="Suivi, nouvelles notes"':t[0]==='gros'&&neuf?' aria-label="Évaluations, nouvelles"':'';
+    return '<button data-act="tab" data-v="'+t[0]+'"'+(UI.tab===t[0]?' aria-current="page"':'')+label+'><span aria-hidden="true">'+t[1]+'</span>'+t[2]+dot+'</button>';
+  };
   $('#tabs').innerHTML=bt(T[0])+bt(T[1])+'<button class="plus" data-act="add" aria-label="Ajouter quelque chose"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>'+bt(T[2])+bt(T[3]);
 }
 
@@ -1075,10 +1138,50 @@ function renderJour(){
   h+='<section class="sec"><h2 class="sh"><span>📤 À remettre '+(isT?'aujourd’hui':esc(when(d)))+'</span></h2>'+(due.length?due.map(i=>tile(i,{mode:'due'})).join(''):'<div class="empty">Rien à remettre.</div>')+'</section>';
   if(isT&&school)h+='<section class="sec"><h2>🏠 Avant de rentrer</h2><p class="hint">À ramener à la maison pour les devoirs et évaluations des 3 prochains jours d’école</p>'+checkList('home',d,homeRows(),'Pas de devoir ni d’évaluation dans les 3 prochains jours.')+'</section>';
   if(!isT)h+='<section class="sec"><h2 class="sh"><span>🎒 Préparer le sac</span></h2><p class="hint">À apporter à l’école '+esc(when(d))+'</p>'+checkList('bag',d,bringRows(d),'Horaire pas encore disponible pour ce jour.')+'</section>';
-  h+='<p class="src"><a class="lien" href="aide/eleve/">Aide</a> · <a class="lien" href="nouveautes/">Nouveautés</a></p>';
-  h+='<p class="src">Version '+VERSION_APP+' · Thème : <button class="lien" data-act="theme">'+({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)')+'</button></p>';
-  h+='<p class="src">Données relevées '+esc(ilya(COLLECTE.genere_le))+'.'+(RELAIS?' Google Drive : relais '+esc(RELAIS_COURT)+'. Synchronisation : '+esc(ETAT_SYNC)+'. <button class="lien" data-act="synchro">Synchroniser</button> · <button class="lien" data-act="delier">Relier à un autre lien</button>':' <button class="lien" data-act="importer">Mettre à jour</button>')+'</p>';
+  h+=piedReleve();
   $('#view').innerHTML=h;
+}
+function texteReleve(){
+  if(!COLLECTE.genere_le)return '';
+  let t='Données relevées '+ilya(COLLECTE.genere_le);
+  const st=statutCourt();
+  if(st==='cours')t+=' · actualisation…';
+  else if(st==='probleme')t+=' · à vérifier';
+  return t;
+}
+function piedReleve(){
+  return '<p class="src releve"><span data-releve>'+esc(texteReleve())+'</span> · <button class="lien" data-act="infos">Détails</button></p>';
+}
+function majLigneReleve(){
+  const el=document.querySelector('[data-releve]');
+  if(el)el.textContent=texteReleve();
+}
+function heureReleve(){
+  const d=new Date(COLLECTE.genere_le);
+  if(isNaN(+d))return '';
+  return d.toLocaleString('fr-CA',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function infosSheet(){
+  const theme=({light:'clair',dark:'sombre'}[localStorage.getItem('mon-cap-theme')]||'auto (comme le téléphone)');
+  let h='<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Détails"><button class="x" data-act="close" aria-label="Fermer">✕</button>';
+  h+='<h2>Détails</h2>';
+  h+='<p>Données relevées <b>'+esc(ilya(COLLECTE.genere_le))+'</b>'+(heureReleve()?'<br><span class="muted">'+esc(heureReleve())+'</span>':'')+'.</p>';
+  if(RELAIS){
+    h+='<p class="muted">Google Drive : relais '+esc(RELAIS_COURT)+'.<br>Synchronisation : '+esc(ETAT_SYNC)+'.</p>';
+    h+='<p class="muted">L’app vérifie toute seule à l’ouverture, au retour, et plus souvent quand le relevé a plus de deux heures.</p>';
+    h+='<button class="btn" data-act="synchro"'+(ETAT_SYNC==='en cours'?' disabled':'')+'>'+(ETAT_SYNC==='en cours'?'Actualisation…':'Actualiser maintenant')+'</button>';
+    h+='<p><button class="lien" data-act="delier">Relier à un autre lien</button></p>';
+  }else h+='<button class="btn" data-act="importer">Mettre à jour avec un fichier</button>';
+  h+='<h3>Application</h3>';
+  h+='<p>Version '+VERSION_APP+'<br>Thème : <button class="lien" data-act="theme">'+esc(theme)+'</button></p>';
+  h+='<p><a class="lien" href="aide/eleve/">Aide</a> · <a class="lien" href="nouveautes/">Nouveautés</a></p>';
+  return h+'</div></div>';
+}
+function openInfos(){
+  if(!UI.sheet)UI.last=document.activeElement;
+  lock();UI.sheet='__infos';
+  const nouvelle=afficherFiche(infosSheet());
+  const x=$('#sheet-root').querySelector('.x');if(x&&nouvelle)x.focus();
 }
 /* Importer : collecte de l'extension, données préparées ou profil. Rien ne quitte le téléphone. */
 function importer(){const f=document.getElementById('fic');f.value='';f.onchange=e=>{const x=e.target.files[0];if(x)traiterImport(x);};f.click();}
@@ -1146,11 +1249,45 @@ function weekSheet(){
 function openWeekPicker(){if(!UI.sheet)UI.last=document.activeElement;lock();UI.sheet='__w';$('#sheet-root').innerHTML=weekSheet();}
 
 /* ===== Gros projets ===== */
+/* Évaluations jamais vues. Au premier lancement, celles déjà affichées sont considérées comme vues. */
+const EVALS_CLE='mon-cap-evals-vues';
+let VUES_EVALS=null;
+function evalsAffichees(){
+  const fin6=addDays(lundi(0),7*NB_SEM-1);
+  return all().filter(i=>BIG[i.ty]&&i.d>=TODAY&&i.d<=fin6).sort(byDate);
+}
+function vuesEvals(){
+  if(VUES_EVALS)return VUES_EVALS;
+  let o=null;try{o=JSON.parse(localStorage.getItem(EVALS_CLE)||'null');}catch(e){}
+  if(o&&o.init){VUES_EVALS=new Set(o.ids||[]);return VUES_EVALS;}
+  const ids=evalsAffichees().map(i=>i.id);
+  VUES_EVALS=new Set(ids);
+  try{localStorage.setItem(EVALS_CLE,JSON.stringify({init:1,ids}));}catch(e){}
+  return VUES_EVALS;
+}
+function marquerEvalsVues(){
+  const ids=evalsAffichees().map(i=>i.id);VUES_EVALS=new Set(ids);
+  try{localStorage.setItem(EVALS_CLE,JSON.stringify({init:1,ids}));}catch(e){}
+}
+function nouvellesEvals(){
+  const v=vuesEvals();
+  return evalsAffichees().filter(i=>!v.has(i.id));
+}
+function resumeEvals(list){
+  if(!list.length)return '';
+  if(list.length===1)return 'Nouvelle évaluation : '+esc(list[0].t);
+  const noms=list.slice(0,3).map(i=>esc(i.t));
+  return list.length+' nouvelles évaluations : '+noms.join(', ')+(list.length>3?'…':'');
+}
 function renderGros(){
   // Fenêtre de 6 semaines, limitée à la période couverte par les données
   const mon0=lundi(0),fin6=addDays(mon0,7*NB_SEM-1);
-  const list=all().filter(i=>BIG[i.ty]&&i.d>=TODAY&&i.d<=fin6).sort(byDate);
+  const list=evalsAffichees();
+  const neuves=UI.evalsNouvelles||[];
+  const idsNeufs=new Set(neuves.map(i=>i.id));
   let h='';
+  const resume=resumeEvals(neuves);
+  if(resume)h+='<p class="bandeau-notes">'+resume+'</p>';
   if(list.length){
     const derniere=list[list.length-1].d, couvert=AG_FIN>derniere?AG_FIN:derniere;
     const end=couvert<fin6?couvert:fin6;
@@ -1159,8 +1296,8 @@ function renderGros(){
     for(let d=addDays(TODAY,1);d<=end;d=addDays(d,1)){
       if(parse(d).getDay()===1){const x=diffDays(d,TODAY)/span*100;r+='<span class="tk" style="left:'+x+'%"></span><span class="tl" style="left:'+x+'%">'+parse(d).getDate()+' '+MON[parse(d).getMonth()]+'</span>';}
     }
-    list.forEach((i,ix)=>{const k=per[i.d]=(per[i.d]||0)+1,w=Math.floor(diffDays(i.d,mon0)/7);
-      r+='<button class="dot" data-act="dot" data-id="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(fmt(i.d))+'" style="left:'+(diffDays(i.d,TODAY)/span*100)+'%;bottom:'+(38+(k-1)*18)+'px;--dy:'+(14+(k-1)*18)+'px;--k:'+ix+';'+cv(co(i))+'"></button>';});
+    list.forEach((i,ix)=>{const k=per[i.d]=(per[i.d]||0)+1,w=Math.floor(diffDays(i.d,mon0)/7),neuf=idsNeufs.has(i.id);
+      r+='<button class="dot'+(neuf?' neuf':'')+'" data-act="dot" data-id="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(fmt(i.d))+(neuf?', nouvelle':'')+'" style="left:'+(diffDays(i.d,TODAY)/span*100)+'%;bottom:'+(38+(k-1)*18)+'px;--dy:'+(14+(k-1)*18)+'px;--k:'+ix+';'+cv(co(i))+'"></button>';});
     h+=r+'</div></div>';
   }
   let cur=-1;
@@ -1168,11 +1305,11 @@ function renderGros(){
     const w=Math.floor(diffDays(i.d,mon0)/7);
     if(w!==cur){cur=w;const ws=addDays(mon0,7*w),we=addDays(ws,4);
       h+='<h3 class="wk" data-w="'+w+'">'+NOMS_SEM[w]+' <span class="muted">(du '+parse(ws).getDate()+' au '+parse(we).getDate()+' '+MON[parse(we).getMonth()]+')</span></h3>';}
-    const c=co(i),st=S.steps[i.id]||[],n=(i.steps||[]).length,dn=st.filter(Boolean).length,dd=diffDays(i.d,TODAY);
+    const c=co(i),st=S.steps[i.id]||[],n=(i.steps||[]).length,dn=st.filter(Boolean).length,dd=diffDays(i.d,TODAY),neuf=idsNeufs.has(i.id);
     const cd=dd===0?'<b>Auj.</b>':'<b>'+dd+'</b><small>'+(dd===1?'jour':'jours')+'</small>';
-    h+='<button class="proj'+(isDone(i.id)?' done':'')+'" style="'+cv(c)+'" data-act="open" data-id="'+i.id+'" data-card="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(when(i.d))+'">'+
+    h+='<button class="proj'+(isDone(i.id)?' done':'')+(neuf?' neuf':'')+'" style="'+cv(c)+'" data-act="open" data-id="'+i.id+'" data-card="'+i.id+'" data-w="'+w+'" aria-label="'+esc(i.t)+', '+esc(when(i.d))+(neuf?', nouvelle':'')+'">'+
       '<span class="cd'+(dd<=2?' soon':'')+'">'+cd+'</span>'+
-      '<span class="pc"><span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i,'eval')+'</span><h3>'+esc(i.t)+'</h3><span class="muted">'+esc(cap(fmt(i.d)))+(i.time?', '+esc(i.time):'')+'</span>'+
+      '<span class="pc"><span class="chips"><span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+typeChip(i,'eval')+(neuf?'<span class="chip neuf">Nouveau</span>':'')+'</span><h3>'+esc(i.t)+'</h3><span class="muted">'+esc(cap(fmt(i.d)))+(i.time?', '+esc(i.time):'')+'</span>'+
       (n?'<div class="bar"><i style="width:'+Math.round(dn/n*100)+'%"></i></div><span class="muted" style="font-size:.85rem">'+dn+'/'+n+' consignes du prof</span>':'')+
       (isDone(i.id)?'<span style="display:block;margin-top:6px">✓ Fait</span>':'')+'</span>'+
       '<span class="arr" aria-hidden="true">›</span></button>';
@@ -1213,15 +1350,65 @@ function spark(v,color){
   // la ligne s'étire avec la carte ; le point final est un rond HTML posé dessus, donc jamais déformé
   return '<div class="spk"><svg viewBox="0 0 100 '+h+'" preserveAspectRatio="none" aria-hidden="true"><polyline class="ln" points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><span class="pt" style="left:'+l[0]+'%;top:'+(l[1]/h*100).toFixed(1)+'%;background:'+color+'"></span></div>';
 }
+/* Notes jamais vues sur cet appareil. Au premier lancement, celles déjà là sont considérées comme vues. */
+const NOTES_CLE='mon-cap-notes-vues';
+let VUES_NOTES=null;
+function cleNote(g){return g.c+'|'+g.d+'|'+(g.p!=null?g.p:(g.cote||''))+'|'+g.l;}
+function clePv(code,x){return 'pv|'+code+'|'+x.nom+'|'+x.note;}
+function clesNotes(){
+  const s=[];
+  (GRADES||[]).forEach(g=>s.push(cleNote(g)));
+  const pv=COLLECTE.provisoires||{};
+  Object.keys(pv).forEach(code=>(pv[code]||[]).forEach(x=>s.push(clePv(code,x))));
+  return s;
+}
+function vuesNotes(){
+  if(VUES_NOTES)return VUES_NOTES;
+  let o=null;try{o=JSON.parse(localStorage.getItem(NOTES_CLE)||'null');}catch(e){}
+  if(o&&o.init){VUES_NOTES=new Set(o.cles||[]);return VUES_NOTES;}
+  const cles=clesNotes();
+  VUES_NOTES=new Set(cles);
+  try{localStorage.setItem(NOTES_CLE,JSON.stringify({init:1,cles}));}catch(e){}
+  return VUES_NOTES;
+}
+function marquerNotesVues(){
+  const cles=clesNotes();VUES_NOTES=new Set(cles);
+  try{localStorage.setItem(NOTES_CLE,JSON.stringify({init:1,cles}));}catch(e){}
+}
+function nouvellesParCours(){
+  const v=vuesNotes(),map={};
+  (GRADES||[]).forEach(g=>{if(!v.has(cleNote(g)))(map[g.c]=map[g.c]||[]).push(g);});
+  const pv=COLLECTE.provisoires||{};
+  Object.keys(pv).forEach(code=>(pv[code]||[]).forEach(x=>{if(!v.has(clePv(code,x)))(map[code]=map[code]||[]).push({pv:1,nom:x.nom,note:x.note});}));
+  return map;
+}
+function resumeNouvelles(map){
+  const codes=Object.keys(map);if(!codes.length)return '';
+  const noms=codes.map(c=>esc((COURSES[c]||{}).n||c));
+  const nb=codes.reduce((n,c)=>n+map[c].filter(x=>!x.pv).length,0);
+  const np=codes.reduce((n,c)=>n+map[c].filter(x=>x.pv).length,0);
+  const b=[];
+  if(nb)b.push(nb+' nouvelle'+(nb>1?'s notes':' note'));
+  if(np)b.push(np>1?'notes provisoires mises à jour':'note provisoire mise à jour');
+  return b.join(' · ')+' : '+noms.join(', ');
+}
+function noteEstNouvelle(g){
+  const m=UI.notesNouvelles;if(!m||!m[g.c])return false;
+  return m[g.c].some(x=>!x.pv&&x.d===g.d&&x.l===g.l&&x.p===g.p&&(x.cote||'')===(g.cote||''));
+}
 function renderNotes(){
+  const map=UI.notesNouvelles||{};
+  const resume=resumeNouvelles(map);
   let h='<section class="sec'+(UI.anim==='notes'?' go':'')+'"><h2>Mes notes</h2>';
+  if(resume)h+='<p class="bandeau-notes">'+resume+'</p>';
   Object.keys(COURSES).forEach(code=>{
     const n=ressenti(code);if(!n)return;
     const c=COURSES[code],g=n.g,der=n.tout[n.tout.length-1],s=n.p!=null?SMI[plage(n.p).k]:null;
+    const neuf=!!map[code];
     // tendance entre les deux dernières notes chiffrées, seulement si la toute dernière est chiffrée
     let tr='';if(der&&der.p!=null&&g.length>1){const dl=g[g.length-1].p-g[g.length-2].p;tr=' <span class="'+(dl>0?'up':dl<0?'down':'')+'">'+(dl>0?'↑ +'+dl:dl<0?'↓ '+dl:'→')+'</span>';}
     const sous=der?'Dernière <b>'+(der.p!=null?der.p+' %':esc(der.cote))+'</b>'+tr:'Provisoire <b>'+n.pv.note+' %</b>';
-    h+='<button class="grade cbtn" data-act="course" data-c="'+code+'" style="'+cv(c)+'" aria-label="'+esc(c.n)+(s?' : '+s[1]:'')+'"><span class="nm"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="ln2">'+sous+'</span></span><div>'+spark(g.map(x=>x.p),c.c)+'</div><span class="smi" aria-hidden="true">'+(s?s[0]:'')+'</span></button>';
+    h+='<button class="grade cbtn'+(neuf?' neuf':'')+'" data-act="course" data-c="'+code+'" style="'+cv(c)+'" aria-label="'+esc(c.n)+(s?' : '+s[1]:'')+(neuf?', nouvelle note':'')+'"><span class="nm"><span class="nomligne"><span class="chip co">'+c.e+' '+esc(c.n)+'</span>'+(neuf?'<span class="chip neuf">Nouveau</span>':'')+'</span><span class="ln2">'+sous+'</span></span><div>'+spark(g.map(x=>x.p),c.c)+'</div><span class="smi" aria-hidden="true">'+(s?s[0]:'')+'</span></button>';
   });
   h+='<p class="src">😄 85 % et plus · 🙂 75 % · 😐 65 % · 💪 moins de 65 %. Selon la note provisoire de Coba, sinon les 3 dernières notes.</p>';
   h+='</section>';
@@ -1301,8 +1488,9 @@ function courseSheet(code){
   h+='<p><b>✉️ Joindre</b><br>Par les courriels de Coba.</p>';
   h+='<p><b>⭐ Prochaines évaluations</b></p>'+(ev.length?ev.map(i=>tile(i,{date:true,mode:'eval'})).join(''):'<p class="muted" style="margin-top:-4px">Aucune pour l’instant.</p>');
   {const pv=(COLLECTE.provisoires||{})[code]||[];
-   if(pv.length)h+='<p><b>🎯 Note provisoire (Coba)</b></p>'+pv.map(x=>'<div class="gl" style="'+xv(x.note)+'"><span>'+esc(x.nom)+'<br><span class="muted" style="font-size:.85rem">'+x.ponderation+' % de la matière</span></span><b>'+x.note+' %</b></div>').join('');}
-  if(last)h+='<p><b>📈 Dernières notes</b></p>'+g.slice(-5).reverse().map(x=>'<div class="gl"'+(x.p!=null?' style="'+xv(x.p)+'"':'')+'><span>'+esc(x.l)+'<br><span class="muted" style="font-size:.85rem">'+esc(cap(fmt(x.d)))+'</span></span><b>'+(x.p!=null?x.p+' %':esc(x.cote))+'</b></div>').join('');
+   const pvN=(UI.notesNouvelles&&UI.notesNouvelles[code]||[]).some(x=>x.pv);
+   if(pv.length)h+='<p><b>🎯 Note provisoire (Coba)</b>'+(pvN?' <span class="chip neuf">Nouveau</span>':'')+'</p>'+pv.map(x=>'<div class="gl" style="'+xv(x.note)+'"><span>'+esc(x.nom)+'<br><span class="muted" style="font-size:.85rem">'+x.ponderation+' % de la matière</span></span><b>'+x.note+' %</b></div>').join('');}
+  if(last)h+='<p><b>📈 Dernières notes</b></p>'+g.slice(-5).reverse().map(x=>'<div class="gl"'+(x.p!=null?' style="'+xv(x.p)+'"':'')+'><span>'+esc(x.l)+'<br><span class="muted" style="font-size:.85rem">'+esc(cap(fmt(x.d)))+(noteEstNouvelle(x)?' <span class="chip neuf">Nouveau</span>':'')+'</span></span><b>'+(x.p!=null?x.p+' %':esc(x.cote))+'</b></div>').join('');
   h+='</div><p class="src" style="margin-top:16px">Source : 🏫 Coba'+(pr.src==='C'?' et 🎓 Classroom':'')+'</p></div></div>';
   return h;
 }
@@ -1341,7 +1529,10 @@ function sheet(i){
   if(i.complements&&i.complements.length)h+='<h3>Sur Classroom</h3>'+i.complements.map(c=>'<div class="comp"><p class="muted" style="margin:0 0 4px">'+esc(c.source)+'</p><p style="white-space:pre-line;margin:0">'+esc(c.texte)+'</p></div>').join('');
   if(i.steps)h+='<h3>Consignes du prof</h3>'+i.steps.map((s,k)=>'<label class="step'+(UI.pop==='s:'+i.id+':'+k?' pop':'')+'"><input type="checkbox" data-act="step" data-id="'+i.id+'" data-i="'+k+'"'+(st[k]?' checked':'')+'><span>'+esc(String(s).replace(/^[-–•*]\s+/,''))+'</span></label>').join('');
   if(i.bring)h+='<h3>À apporter à l’école</h3><p>'+esc(i.bring.join(', '))+'</p>';
-  if(WORK[i.ty])h+='<button class="btn'+(isDone(i.id)?' plain':'')+'" data-act="toggle" data-id="'+i.id+'">'+(isDone(i.id)?'Pas encore fait':'C’est fait ✓')+'</button>';
+  if(WORK[i.ty]){
+    if(isDone(i.id))h+='<div class="fait-bande" role="status"><b>✓ C’est fait</b><button class="btn plain" data-act="toggle" data-id="'+i.id+'" aria-label="Enlever la coche">Annuler</button></div>';
+    else h+='<button class="btn marquer" data-act="toggle" data-id="'+i.id+'" aria-pressed="false"><span class="rond" aria-hidden="true"></span><span class="mt">Marquer comme fait<small>Pas encore coché</small></span></button>';
+  }
   if(i.src==='M')h+='<div class="row2"><button class="btn plain" data-act="edit" data-id="'+i.id+'">✏️ Modifier</button><button class="btn danger" data-act="del" data-id="'+i.id+'">'+(UI.delArm===i.id?'Confirmer ?':'🗑️ Supprimer')+'</button></div>';
   h+='<p class="src" style="margin-top:16px">Source : '+esc(srcText(i.src))+'</p>';
   return h+'</div></div>';
@@ -1397,6 +1588,12 @@ function guideIOS(){
 }
 function render(){
   if(!A_DONNEES){accueilVide();$('#tabs').hidden=true;return;}
+  if(UI.tab==='notes'){
+    if(!UI.notesPret){UI.notesNouvelles=nouvellesParCours();marquerNotesVues();UI.notesPret=true;}
+  }else UI.notesPret=false;
+  if(UI.tab==='gros'){
+    if(!UI.evalsPret){UI.evalsNouvelles=nouvellesEvals();marquerEvalsVues();UI.evalsPret=true;}
+  }else UI.evalsPret=false;
   renderTop();renderTabs();
   ({jour:renderJour,semaine:renderSemaine,gros:renderGros,notes:renderNotes})[UI.tab]();
   // installation : guide iPhone (arrivé par le lien dans Safari) ou bouton Android
@@ -1438,13 +1635,14 @@ document.addEventListener('click',function(e){
   else if(a==='copiercode'){(async()=>{try{await navigator.clipboard.writeText(lienDeRelais(RELAIS));toast('Code copié');}catch(e){toast('Copie impossible');}})();}
   else if(a==='fermerguide'){ARRIVEE_PAR_LIEN=false;try{sessionStorage.removeItem('mon-cap-guide');}catch(e){}render();}
   else if(a==='installer'&&INVITE_INSTALL){INVITE_INSTALL.prompt();INVITE_INSTALL.userChoice.finally(()=>{INVITE_INSTALL=null;render();});}
+  else if(a==='infos')openInfos();
   else if(a==='theme'){const ordre=['auto','light','dark'],cur=localStorage.getItem('mon-cap-theme')||'auto',nx=ordre[(ordre.indexOf(cur)+1)%3];
     if(nx==='auto'){localStorage.removeItem('mon-cap-theme');document.documentElement.removeAttribute('data-theme');}
     else{localStorage.setItem('mon-cap-theme',nx);document.documentElement.setAttribute('data-theme',nx);}
     const sombre=nx==='dark'||(nx==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelectorAll('meta[name=theme-color]').forEach((m,k)=>{if(nx==='auto'){m.setAttribute('media',k===0?'(prefers-color-scheme: light)':'(prefers-color-scheme: dark)');m.content=k===0?'#F3F6FF':'#0D1130';}else{m.removeAttribute('media');m.content=sombre?'#0D1130':'#F3F6FF';}});
-    render();}
-  else if(a==='synchro'){ETAT_SYNC='en cours';render();synchroniser().then(()=>toast('À jour'));}
+    render();if(UI.sheet==='__infos')afficherFiche(infosSheet());}
+  else if(a==='synchro'){synchroniser(true).then(ok=>{if(ok===true)toast('À jour');else if(ok===false)toast('Actualisation impossible');});}
   else if(a==='relier'){const r=lireLienRelais(($('#lien')||{}).value||'');if(!r){toast('Lien non reconnu');return;}enregistrerLien(r);location.reload();}
   else if(a==='dot')allerEval(v.id);
   else if(a==='suivi')openSuivi(v.v);
@@ -1477,7 +1675,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('toggle',function(e){const d=e.target;if(d&&d.dataset&&d.dataset.fold){S.open[d.dataset.fold]=d.open;if(d.open&&d.classList)d.classList.add('anim');save();}},true);
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&UI.sheet)closeSheet();});
 render();
-synchroniser();   /* données et coches partagées, si le relais est configuré */
+synchroniser(true);   /* données et coches partagées, si le relais est configuré */
 })();
 </script>
 <input type="file" id="fic" accept="application/json,.json" hidden>

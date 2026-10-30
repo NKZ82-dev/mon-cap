@@ -35,7 +35,7 @@
   <h2 id="collectes">Les collectes</h2>
   <ul class="liste">
     <li><b>Automatiques</b> toutes les 3 heures, tant que Chrome est ouvert sur l’ordinateur. Une collecte attend un moment où vous n’utilisez pas l’ordinateur, pour ne pas vous gêner. La fréquence se règle dans Réglages → Les collectes.</li>
-    <li><b>À la demande</b> : bouton « Lancer une collecte », dans la fenêtre de l’icône ou les Réglages. Une demande manuelle passe devant une collecte automatique en attente.</li>
+    <li><b>À la demande</b> : bouton « Lancer une collecte », dans la fenêtre de l’icône ou les Réglages. Pour un seul côté : Réglages → Les collectes → Collecter Coba, ou Collecter Classroom. Une demande manuelle passe devant une collecte automatique en attente.</li>
     <li><b>En deux temps</b> : les données sont déposées dans Drive dès que Coba et Classroom sont lus, puis complétées une fois que l’IA a lu les messages.</li>
     <li><b>Prudentes</b> : une collecte ratée ou incomplète ne remplace jamais de bonnes données. Un cours Classroom illisible ou un agenda tronqué est complété par la collecte précédente, et le journal le signale.</li>
   </ul>
@@ -44,9 +44,9 @@
   <ul class="liste">
     <li><b>Relier un téléphone</b> : Réglages → Les téléphones, puis visez le QR code avec l’appareil photo. Sur iPhone, l’app guide l’installation en trois gestes : Copier mon code, Sur l’écran d’accueil, Coller mon code.</li>
     <li><b>Les coches sont partagées</b> entre tous les téléphones reliés, y compris les ajouts faits à la main.</li>
-    <li><b>Se mettre à jour</b> : l’app se synchronise à l’ouverture, chaque minute, et quand on tire l’écran vers le bas.</li>
+    <li><b>Se mettre à jour</b> : l’app se synchronise à l’ouverture, au retour, et tant qu’elle est ouverte (plus souvent si le relevé a plus de deux heures). En bas de l’onglet Jour, l’heure du relevé reste affichée. Détails → Actualiser maintenant force un passage. On peut aussi tirer l’écran vers le bas.</li>
     <li><b>Téléphone perdu</b> : dans votre feuille Mon Cap, menu Mon Cap → Changer la clé des téléphones. Les anciens liens cessent aussitôt de fonctionner. Reliez ensuite le nouveau code dans les Réglages, et rescannez le QR code avec les téléphones de la famille.</li>
-    <li><b>Quel relais ?</b> En bas de l’onglet Jour, l’app affiche le nom de son relais (« relais …xxxxxx ») ; les Réglages de l’extension affichent le même. S’ils diffèrent, téléphone et ordinateur n’écrivent pas dans le même Drive.</li>
+    <li><b>Quel relais ?</b> Détails, en bas de l’onglet Jour, affiche le nom du relais (« relais …xxxxxx ») ; les Réglages de l’extension affichent le même. S’ils diffèrent, téléphone et ordinateur n’écrivent pas dans le même Drive.</li>
     <li><b>Ne partagez jamais</b> le lien ou le QR code des téléphones, ni votre code de liaison : ils donnent accès aux données de votre enfant. Pour faire découvrir Mon Cap, envoyez la page d’installation.</li>
   </ul>
 
@@ -54,7 +54,7 @@
   <p>Installez l’extension sur le second ordinateur et suivez l’assistant, sauf à l’étape Google Drive : <b>ne recopiez pas la feuille</b>. Dans votre feuille existante, menu Mon Cap → 2. Obtenir mon code de liaison, avec l’adresse du déploiement actuel, puis collez ce code. Les deux ordinateurs collectent sans se gêner : une seule collecte a lieu à la fois, et aucune n’écrase un dépôt plus récent.</p>
 
   <h2 id="maj">Mises à jour</h2>
-  <p>L’extension vérifie chaque jour s’il existe une nouvelle version ; son icône affiche alors <b>MAJ</b>. On peut aussi vérifier tout de suite : menu Plus → Vérifier les mises à jour. Pour installer : téléchargez le zip, décompressez-le <b>dans le même dossier</b> en remplaçant les fichiers, puis rechargez l’extension (↻ dans chrome://extensions). Ce qui change à chaque version est décrit dans les <a href="../nouveautes/">nouveautés</a>.</p>
+  <p>L’extension vérifie chaque jour s’il existe une nouvelle version ; son icône affiche alors <b>MAJ</b>. On peut aussi vérifier tout de suite : bouton <b>Mises à jour</b>, à côté de Ouvrir l’app, ou dans les Réglages. Pour installer : téléchargez le zip, décompressez-le <b>dans le même dossier</b> en remplaçant les fichiers, puis rechargez l’extension (↻ dans chrome://extensions). Ce qui change à chaque version est décrit dans les <a href="../nouveautes/">nouveautés</a>.</p>
 
   <h2 id="journal">Le journal</h2>
   <p>Réglages → Dépannage → Journal. Les messages les plus utiles :</p>
@@ -68,7 +68,7 @@
     <tr><td>Relais : le relais n’a pas répondu en 20 s</td><td>Google est lent ou le déploiement a changé. Réessayez ; si cela persiste, vérifiez le déploiement de votre feuille (Gérer les déploiements).</td></tr>
     <tr><td>Drive : une collecte plus récente a été déposée par un autre ordinateur</td><td>Protection contre l’écrasement : rien à faire.</td></tr>
   </table>
-  <p>Côté téléphone, en bas de l’onglet Jour :</p>
+  <p>Côté téléphone, dans Détails (en bas de l’onglet Jour) :</p>
   <table class="tableau">
     <tr><th>Message</th><th>Ce que ça veut dire, et quoi faire</th></tr>
     <tr><td>données reçues incomplètes, les précédentes sont gardées</td><td>La dernière collecte était nettement plus pauvre que d’habitude. L’app garde les bonnes données ; regardez le journal de l’extension.</td></tr>

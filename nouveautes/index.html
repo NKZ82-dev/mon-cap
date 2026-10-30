@@ -15,16 +15,21 @@
   <nav class="liens-site"><a href="../aide/">Aide</a><a href="../aide/eleve/">Guide de l’élève</a><a href="../nouveautes/">Nouveautés</a></nav></header>
 <main class="page">
   <h1>Nouveautés</h1>
-  <p class="chapeau">Ce qui a été ajouté, modifié et corrigé à chaque version. Le numéro de l’extension est affiché dans ses Réglages ; celui de l’app, en bas de son onglet Jour.</p>
+  <p class="chapeau">Ce qui a été ajouté, modifié et corrigé à chaque version. Le numéro de l’extension est affiché dans ses Réglages ; celui de l’app, dans Détails en bas de l’onglet Jour.</p>
   <div id="versions"><p class="aide">Chargement…</p></div>
   <script>
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const liste = (titre, l) => l && l.length ? '<h3>' + titre + '</h3><ul>' + l.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '';
   fetch('nouveautes.json', { cache: 'no-store' }).then(r => r.json()).then(vs => {
-    document.getElementById('versions').innerHTML = vs.map(v => '<section class="version" id="v' + esc(v.version) + '"><h2>Extension ' + esc(v.version)
-      + (v.app ? '<span class="etiq">app ' + esc(v.app) + '</span>' : '') + '</h2><p class="date">'
-      + new Date(v.date + 'T12:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) + '</p>'
-      + liste('Ajouté', v.ajoute) + liste('Modifié', v.modifie) + liste('Corrigé', v.corrige) + '</section>').join('');
+    document.getElementById('versions').innerHTML = vs.map(v => {
+      const appSeule = v.version === 'app';
+      const id = appSeule ? 'app-' + (v.app || '') : 'v' + v.version;
+      const titre = appSeule ? 'App ' + (v.app || '') : 'Extension ' + v.version;
+      return '<section class="version" id="' + esc(id) + '"><h2>' + esc(titre)
+        + (!appSeule && v.app ? '<span class="etiq">app ' + esc(v.app) + '</span>' : '') + '</h2><p class="date">'
+        + new Date(v.date + 'T12:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) + '</p>'
+        + liste('Ajouté', v.ajoute) + liste('Modifié', v.modifie) + liste('Corrigé', v.corrige) + '</section>';
+    }).join('');
     if (location.hash) { const c = document.getElementById(location.hash.slice(1)); if (c) c.scrollIntoView(); }
   }).catch(() => { document.getElementById('versions').innerHTML = '<p class="aide">Impossible de charger les nouveautés.</p>'; });
   </script>
