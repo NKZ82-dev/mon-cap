@@ -1,5 +1,13 @@
 [
  {
+  "version": "0.15.8",
+  "date": "2026-10-29",
+  "modifie": [
+   "La fenêtre de l’icône ne garde que Ouvrir l’app et Mises à jour. Le numéro de version n’y est plus affiché.",
+   "Collecter Coba et Collecter Classroom sont dans les Réglages, section Les collectes. Aide, Nouveautés et Relancer l’assistant y restent aussi."
+  ]
+ },
+ {
   "version": "app",
   "app": "24",
   "date": "2026-10-29",
