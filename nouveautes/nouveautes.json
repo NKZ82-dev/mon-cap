@@ -1,5 +1,14 @@
 [
  {
+  "version": "0.15.9",
+  "app": "25",
+  "date": "2026-10-30",
+  "corrige": [
+   "Sport-études : le cours de 10h55 reste à l’horaire et le dîner commence à 12h10. L’horaire régulier (dîner 10h55, cours à 12h15) ne change pas.",
+   "Les arts plastiques s’affichent. L’onglet Suivi ne s’ouvrait plus quand cette matière était au dossier."
+  ]
+ },
+ {
   "version": "0.15.8",
   "date": "2026-10-29",
   "modifie": [

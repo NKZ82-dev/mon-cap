@@ -39,7 +39,8 @@ function construireProfil(col){
   for(const [c,v] of Object.entries(parCours)) P.profs[c]={p:nomComplet(parFreq(v.profs)[0]),loc:parFreq(v.locaux).join(' ou ')};
   // récups annoncées dans une consigne Classroom : on garde la phrase exacte du prof
   const CRC=nom=>{const n=(nom||'').toLowerCase();if(/math/.test(n))return'MAT';if(/fran/.test(n))return'FRA';if(/english|angl/.test(n))return'ANG';
-    if(/hist/.test(n))return'HIS';if(/g[ée]o/.test(n))return'GEO';if(/scien/.test(n))return'SCT';if(/ate|cr[ée]atic/.test(n))return'ATE';return null;};
+    if(/hist/.test(n))return'HIS';if(/g[ée]o/.test(n))return'GEO';if(/scien/.test(n))return'SCT';
+    if(/arts?\s*plastique/.test(n))return'ART';if(/ate|cr[ée]atic/.test(n))return'ATE';return null;};
   for(const p of cr.publications||[]) for(const e of p.elements||[]){
     const code=CRC(p.cours); if(!code||!P.profs[code]||P.profs[code].rec)continue;
     const phrase=(e.detail||'').split(/\n|(?<=[.!?])\s+/).find(x=>/r[ée]cup[ée]ration/i.test(x)&&/\d{1,2}\s*h\s*\d{2}/.test(x));
@@ -87,11 +88,12 @@ for(const [code,p] of Object.entries((profil&&profil.profs)||{})){const n=(p.p||
 
 // --- Code de cours à 3 lettres (MAT, FRA…) à partir du code Coba (ex. MAT201) ou du cours Classroom ---
 const CODE3=c=>(c||'').slice(0,3).toUpperCase();
-const COURS_CONNUS={MAT:1,FRA:1,ANG:1,HIS:1,GEO:1,SCT:1,ATE:1,CCQ:1,DRA:1,EDU:1};
+const COURS_CONNUS={MAT:1,FRA:1,ANG:1,HIS:1,GEO:1,SCT:1,ART:1,ATE:1,CCQ:1,DRA:1,EDU:1};
 // Classroom : "Mathématique(201)" -> MAT, "ATE groupe A" -> ATE, "English" -> ANG, "Géographie" -> GEO
 const CR2CODE=nom=>{const n=(nom||'').toLowerCase();
   if(/math/.test(n))return'MAT'; if(/fran/.test(n))return'FRA'; if(/english|angl/.test(n))return'ANG';
   if(/hist/.test(n))return'HIS'; if(/g[ée]o/.test(n))return'GEO'; if(/scien|sct/.test(n))return'SCT';
+  if(/arts?\s*plastique/.test(n))return'ART';
   if(/ate|cr[ée]atic|tinker|impression|fablab/.test(n))return'ATE'; if(/cit|ccq/.test(n))return'CCQ';
   if(/dram|th[ée][aâ]/.test(n))return'DRA'; if(/[ée]duc|sport|endurance/.test(n))return'EDU'; return null;};
 
@@ -99,7 +101,15 @@ const CR2CODE=nom=>{const n=(nom||'').toLowerCase();
 const hh=t=>{const m=(t||'').match(/(\d{1,2}):(\d{2})/);return m?(+m[1])+'h'+m[2]:'';};
 
 // --- AGENDA daté : { "AAAA-MM-JJ": { cycle:5, periodes:[{h:"8h05",code:"MAT"},…] } } ---
-const DEBUTS=['08:05','09:30','12:15','13:40','15:05'];
+// Horaire régulier : cours à 8h05, 9h30, 12h15, 13h40, dîner 10h55–12h10.
+// Sport-études : trois cours le matin (le 3e à 10h55), dîner à 12h10. On ne bascule que si
+// l'agenda a des cours à 10h55 et aucun à 12h15. Un agenda régulier, même avec une heure
+// isolée à 10h55, garde les heures actuelles.
+const heuresAgenda=new Set();
+for(const j of coba.agenda||[]) for(const c of j.cours||[]) if(c.groupe&&c.heure) heuresAgenda.add(c.heure);
+const SPORT=heuresAgenda.has('10:55')&&!heuresAgenda.has('12:15');
+const DEBUTS=SPORT?['08:05','09:30','10:55']:['08:05','09:30','12:15','13:40','15:05'];
+const DINER=SPORT?['12:10','13:10']:['10:55','12:10'];
 const AGENDA={};
 for(const j of coba.agenda||[]){
   // seules les heures de début de période sont des cours ; « 23:59 » est une heure limite de remise
@@ -345,6 +355,7 @@ for(const m of coba.courriels||[]){
 return {
   type:'mon-cap-donnees',version:1,
   genere_le:col.collecte_le,
+  diner:DINER,
   agenda:AGENDA,
   conges:CONGES,
   items:ITEMS.concat(ANNONCES,EVALS_CLASSROOM),

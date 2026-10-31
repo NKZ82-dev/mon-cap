@@ -461,7 +461,8 @@ function construireProfil(col){
   for(const [c,v] of Object.entries(parCours)) P.profs[c]={p:nomComplet(parFreq(v.profs)[0]),loc:parFreq(v.locaux).join(' ou ')};
   // récups annoncées dans une consigne Classroom : on garde la phrase exacte du prof
   const CRC=nom=>{const n=(nom||'').toLowerCase();if(/math/.test(n))return'MAT';if(/fran/.test(n))return'FRA';if(/english|angl/.test(n))return'ANG';
-    if(/hist/.test(n))return'HIS';if(/g[ée]o/.test(n))return'GEO';if(/scien/.test(n))return'SCT';if(/ate|cr[ée]atic/.test(n))return'ATE';return null;};
+    if(/hist/.test(n))return'HIS';if(/g[ée]o/.test(n))return'GEO';if(/scien/.test(n))return'SCT';
+    if(/arts?\s*plastique/.test(n))return'ART';if(/ate|cr[ée]atic/.test(n))return'ATE';return null;};
   for(const p of cr.publications||[]) for(const e of p.elements||[]){
     const code=CRC(p.cours); if(!code||!P.profs[code]||P.profs[code].rec)continue;
     const phrase=(e.detail||'').split(/\n|(?<=[.!?])\s+/).find(x=>/r[ée]cup[ée]ration/i.test(x)&&/\d{1,2}\s*h\s*\d{2}/.test(x));
@@ -509,11 +510,12 @@ for(const [code,p] of Object.entries((profil&&profil.profs)||{})){const n=(p.p||
 
 // --- Code de cours à 3 lettres (MAT, FRA…) à partir du code Coba (ex. MAT201) ou du cours Classroom ---
 const CODE3=c=>(c||'').slice(0,3).toUpperCase();
-const COURS_CONNUS={MAT:1,FRA:1,ANG:1,HIS:1,GEO:1,SCT:1,ATE:1,CCQ:1,DRA:1,EDU:1};
+const COURS_CONNUS={MAT:1,FRA:1,ANG:1,HIS:1,GEO:1,SCT:1,ART:1,ATE:1,CCQ:1,DRA:1,EDU:1};
 // Classroom : "Mathématique(201)" -> MAT, "ATE groupe A" -> ATE, "English" -> ANG, "Géographie" -> GEO
 const CR2CODE=nom=>{const n=(nom||'').toLowerCase();
   if(/math/.test(n))return'MAT'; if(/fran/.test(n))return'FRA'; if(/english|angl/.test(n))return'ANG';
   if(/hist/.test(n))return'HIS'; if(/g[ée]o/.test(n))return'GEO'; if(/scien|sct/.test(n))return'SCT';
+  if(/arts?\s*plastique/.test(n))return'ART';
   if(/ate|cr[ée]atic|tinker|impression|fablab/.test(n))return'ATE'; if(/cit|ccq/.test(n))return'CCQ';
   if(/dram|th[ée][aâ]/.test(n))return'DRA'; if(/[ée]duc|sport|endurance/.test(n))return'EDU'; return null;};
 
@@ -521,7 +523,15 @@ const CR2CODE=nom=>{const n=(nom||'').toLowerCase();
 const hh=t=>{const m=(t||'').match(/(\d{1,2}):(\d{2})/);return m?(+m[1])+'h'+m[2]:'';};
 
 // --- AGENDA daté : { "AAAA-MM-JJ": { cycle:5, periodes:[{h:"8h05",code:"MAT"},…] } } ---
-const DEBUTS=['08:05','09:30','12:15','13:40','15:05'];
+// Horaire régulier : cours à 8h05, 9h30, 12h15, 13h40, dîner 10h55–12h10.
+// Sport-études : trois cours le matin (le 3e à 10h55), dîner à 12h10. On ne bascule que si
+// l'agenda a des cours à 10h55 et aucun à 12h15. Un agenda régulier, même avec une heure
+// isolée à 10h55, garde les heures actuelles.
+const heuresAgenda=new Set();
+for(const j of coba.agenda||[]) for(const c of j.cours||[]) if(c.groupe&&c.heure) heuresAgenda.add(c.heure);
+const SPORT=heuresAgenda.has('10:55')&&!heuresAgenda.has('12:15');
+const DEBUTS=SPORT?['08:05','09:30','10:55']:['08:05','09:30','12:15','13:40','15:05'];
+const DINER=SPORT?['12:10','13:10']:['10:55','12:10'];
 const AGENDA={};
 for(const j of coba.agenda||[]){
   // seules les heures de début de période sont des cours ; « 23:59 » est une heure limite de remise
@@ -767,6 +777,7 @@ for(const m of coba.courriels||[]){
 return {
   type:'mon-cap-donnees',version:1,
   genere_le:col.collecte_le,
+  diner:DINER,
   agenda:AGENDA,
   conges:CONGES,
   items:ITEMS.concat(ANNONCES,EVALS_CLASSROOM),
@@ -829,6 +840,7 @@ const COURSES={
   HIS:{n:'Histoire',e:'🏺',c:'#B8470B',fg:'#FFFFFF'},
   GEO:{n:'Géo',e:'🌍',c:'#2B8A3E',fg:'#FFFFFF'},
   SCT:{n:'Science',e:'🔬',c:'#0B7285',fg:'#FFFFFF'},
+  ART:{n:'Arts plastiques',e:'🎨',c:'#E67700',fg:'#15193D'},
   ATE:{n:'Créatic',e:'🛠️',c:'#F59F00',fg:'#15193D'},
   CCQ:{n:'Citoyenneté',e:'⚖️',c:'#9C36B5',fg:'#FFFFFF'},
   DRA:{n:'Art dram.',e:'🎭',c:'#5C7080',fg:'#FFFFFF'},
@@ -843,7 +855,7 @@ const ITEMS=COLLECTE.items.concat(COLLECTE.recups,COLLECTE.evenements||[]);const
 const CONSIGNES=COLLECTE.consignes;
 const CYC=(PROFIL.cycle&&PROFIL.cycle.grille)||[];
 const SLOTS=[['08:05','09:20'],['09:30','10:45'],['12:15','13:30'],['13:40','14:55']];
-const LUNCH=['10:55','12:10'];
+const LUNCH=(Array.isArray(COLLECTE.diner)&&COLLECTE.diner.length===2)?COLLECTE.diner:['10:55','12:10'];
 const CY=PROFIL.cycle||{},REF=CY.ref||'',REF_DAY=CY.jour_ref||1,CYC_FROM=CY.du||'',CYC_TO=CY.au||'',CYC_N=CY.longueur||19;
 const PRE_DONE=[];
 const PROFS=PROFIL.profs||{};
@@ -888,7 +900,7 @@ function cycleDayCalc(s){
 const NEXT=nextSchool(TODAY);
 
 /* ===== État : seulement les cases cochées ===== */
-const VERSION_APP='24';   // à garder égal au numéro de sw.js (mon-cap-N), affiché dans Détails
+const VERSION_APP='25';   // à garder égal au numéro de sw.js (mon-cap-N), affiché dans Détails
 const KEY='mon-cap-v2';
 function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign({done:{},steps:{},open:{},bag:{},home:{},custom:[]},JSON.parse(r));}catch(e){}return{done:{},steps:{},open:{},bag:{},home:{},custom:[]};}
 let S=load();
@@ -1091,7 +1103,7 @@ function homeRows(){
   let lim=TODAY;for(let k=0;k<3;k++)lim=nextSchool(lim);
   const items=all().filter(i=>WORK[i.ty]&&i.d>TODAY&&i.d<=lim&&!isDone(i.id)).sort(byDate),by={},order=[];
   items.forEach(i=>{if(!by[i.c]){by[i.c]=[];order.push(i.c);}by[i.c].push(i);});
-  return order.map(code=>{const c=COURSES[code];return{k:code,t:c.e+' Matériel : '+c.n,s:'Pour : '+by[code].map(i=>i.t+' ('+when(i.d)+')').join(', ')};});
+  return order.map(code=>{const c=COURSES[code]||COURSES.EVT;return{k:code,t:c.e+' Matériel : '+c.n,s:'Pour : '+by[code].map(i=>i.t+' ('+when(i.d)+')').join(', ')};});
 }
 function checkList(kind,d,rows,empty){
   if(!rows.length)return '<div class="empty">'+esc(empty)+'</div>';
@@ -1418,8 +1430,8 @@ function renderNotes(){
     +'<button class="srow" data-act="suivi" data-v="pos"><span><b>'+SUIVI.pos+' commentaires positifs</b></span><span aria-hidden="true">›</span></button>'
     +'<button class="srow" data-act="suivi" data-v="rem"><span><b>'+SUIVI.tips+' remarques</b></span><span aria-hidden="true">›</span></button></div></section>';
   const grp={};NOGRADE.forEach(x=>{(grp[x[0]]=grp[x[0]]||[]).push(x);});
-  const ng=Object.keys(grp).sort((a,b)=>grp[b].length-grp[a].length).map(code=>{const c=COURSES[code],g=grp[code];return '<div class="ng" style="'+cv(c)+'"><div class="ngh"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="muted">'+g.length+' '+(g.length>1?'travaux':'travail')+'</span></div>'+g.slice().sort((a,b)=>a[2]<b[2]?-1:1).map(x=>'<div class="ngr"><span>'+esc(x[1])+'</span><span class="chip'+(diffDays(TODAY,x[2])>14?' old':'')+'">'+esc(fmt(x[2]))+'</span></div>').join('')+'</div>';}).join('');
-  if(Object.keys(PROFS).length)h+='<section class="sec"><h2>Mes profs</h2>'+Object.keys(PROFS).map(code=>{const c=COURSES[code];return '<button class="prow2 cbtn" data-act="course" data-c="'+code+'" style="'+cv(c)+'"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="pn">'+esc(PROFS[code].p)+'</span></button>';}).join('')+'<p class="src">Touche une matière pour voir son prof, ses récups et ses prochaines évaluations.</p></section>';
+  const ng=Object.keys(grp).sort((a,b)=>grp[b].length-grp[a].length).map(code=>{const c=COURSES[code]||COURSES.EVT,g=grp[code];return '<div class="ng" style="'+cv(c)+'"><div class="ngh"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="muted">'+g.length+' '+(g.length>1?'travaux':'travail')+'</span></div>'+g.slice().sort((a,b)=>a[2]<b[2]?-1:1).map(x=>'<div class="ngr"><span>'+esc(x[1])+'</span><span class="chip'+(diffDays(TODAY,x[2])>14?' old':'')+'">'+esc(fmt(x[2]))+'</span></div>').join('')+'</div>';}).join('');
+  if(Object.keys(PROFS).length)h+='<section class="sec"><h2>Mes profs</h2>'+Object.keys(PROFS).map(code=>{const c=COURSES[code]||COURSES.EVT;return '<button class="prow2 cbtn" data-act="course" data-c="'+code+'" style="'+cv(c)+'"><span class="chip co">'+c.e+' '+esc(c.n)+'</span><span class="pn">'+esc(PROFS[code].p)+'</span></button>';}).join('')+'<p class="src">Touche une matière pour voir son prof, ses récups et ses prochaines évaluations.</p></section>';
   h+=fold('nograde','Travaux sans note dans Coba ('+NOGRADE.length+')','<p class="muted" style="margin-top:0">Date de remise passée et aucune note affichée dans Coba. En orange : date de remise dépassée depuis plus de 2 semaines.</p>'+ng);
   $('#view').innerHTML=h;
 }
