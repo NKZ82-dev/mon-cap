@@ -1,5 +1,13 @@
 [
  {
+  "version": "0.15.13",
+  "date": "2026-11-06",
+  "corrige": [
+   "Les onglets de Cours (Travaux, Accueil, Ressources) sont reconnus malgré les capitales affichées. La collecte clique Travaux, plus la page vide Ressources.",
+   "L’horaire : les périodes sont des blocs de dates, pas des boutons. La collecte clique celui qui contient aujourd’hui."
+  ]
+ },
+ {
   "version": "0.15.12",
   "date": "2026-11-06",
   "corrige": [

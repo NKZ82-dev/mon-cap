@@ -1,6 +1,6 @@
 {
-  "version": "0.15.12",
+  "version": "0.15.13",
   "date": "2026-11-06",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.12.zip",
-  "nouveautes": ["Coba : la page Cours a des onglets (Accueil, ressources, examens) ; l’horaire se choisit d’abord par dates"]
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.13.zip",
+  "nouveautes": ["Coba : on ouvre l’onglet Travaux (le CSS l’affichait en capitales, on le manquait) ; l’horaire se clique même sans bouton"]
 }
