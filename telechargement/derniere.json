@@ -1,6 +1,6 @@
 {
-  "version": "0.15.11",
+  "version": "0.15.12",
   "date": "2026-11-06",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.11.zip",
-  "nouveautes": ["Coba a renommé Travaux en Cours et retiré Agenda du menu : la collecte suit ce nouveau menu"]
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.12.zip",
+  "nouveautes": ["Coba : la page Cours a des onglets (Accueil, ressources, examens) ; l’horaire se choisit d’abord par dates"]
 }

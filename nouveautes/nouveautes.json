@@ -1,5 +1,13 @@
 [
  {
+  "version": "0.15.12",
+  "date": "2026-11-06",
+  "corrige": [
+   "La page Cours n’est plus la liste des travaux : la collecte ouvre l’onglet Accueil, puis chaque matière, et lit aussi Formulaires / examens.",
+   "L’horaire commence par une liste de périodes (dates). La collecte ouvre celle qui contient aujourd’hui."
+  ]
+ },
+ {
   "version": "0.15.11",
   "date": "2026-11-06",
   "corrige": [
