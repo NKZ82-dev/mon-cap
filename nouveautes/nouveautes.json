@@ -1,5 +1,13 @@
 [
  {
+  "version": "0.15.10",
+  "date": "2026-11-06",
+  "corrige": [
+   "Une collecte Coba ne s’arrête plus quand le menu Travaux est replié, ou quand Coba y ajoute une icône ou une pastille.",
+   "Si Coba n’a pas pu être lu, les compteurs de la fenêtre ne passent plus à zéro : les données précédentes restent affichées, et Drive n’est pas écrasé."
+  ]
+ },
+ {
   "version": "0.15.9",
   "app": "25",
   "date": "2026-10-30",

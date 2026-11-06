@@ -1,6 +1,6 @@
 {
-  "version": "0.15.9",
-  "date": "2026-10-30",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.9.zip",
-  "nouveautes": ["sport-études : le cours de 10h55 est gardé et le dîner commence à 12h10 ; arts plastiques et onglet Suivi"]
+  "version": "0.15.10",
+  "date": "2026-11-06",
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.10.zip",
+  "nouveautes": ["Coba : le menu Travaux est retrouvé même s’il est replié ; une collecte ratée ne met plus les compteurs à zéro"]
 }
