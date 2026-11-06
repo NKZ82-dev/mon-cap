@@ -1,6 +1,6 @@
 {
-  "version": "0.15.10",
+  "version": "0.15.11",
   "date": "2026-11-06",
-  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.10.zip",
-  "nouveautes": ["Coba : le menu Travaux est retrouvé même s’il est replié ; une collecte ratée ne met plus les compteurs à zéro"]
+  "telechargement": "https://nkz82-dev.github.io/mon-cap/telechargement/mon-cap-collecte-0.15.11.zip",
+  "nouveautes": ["Coba a renommé Travaux en Cours et retiré Agenda du menu : la collecte suit ce nouveau menu"]
 }

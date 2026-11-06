@@ -1,5 +1,12 @@
 [
  {
+  "version": "0.15.11",
+  "date": "2026-11-06",
+  "corrige": [
+   "Coba a remplacé le menu Travaux par Cours, et retiré Agenda. La collecte lit Cours, et cherche le calendrier dans Accueil ou Horaire."
+  ]
+ },
+ {
   "version": "0.15.10",
   "date": "2026-11-06",
   "corrige": [
